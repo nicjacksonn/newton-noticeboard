@@ -1,0 +1,1035 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Newton Sixth Form — Staff Notice Board</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --navy:        #1B3A8C;
+      --navy-deep:   #122870;
+      --navy-dark:   #0E1F55;
+      --navy-mid:    #1D3D96;
+      --navy-light:  #243FA0;
+      --gold:        #C9A84C;
+      --gold-light:  #E0C06A;
+      --gold-pale:   #F0D88A;
+      --gold-dim:    #8A6F2E;
+      --white:       #FFFFFF;
+      --off-white:   #F4F2EC;
+      --text-main:   #EEF0F8;
+      --text-soft:   #B8C4E0;
+      --text-dim:    #7A8EC4;
+      --border:      rgba(201,168,76,0.18);
+      --border-sub:  rgba(255,255,255,0.08);
+      --urgent:      #E05050;
+      --urgent-pale: rgba(224,80,80,0.12);
+      --green:       #4EA86A;
+      --green-pale:  rgba(78,168,106,0.12);
+      --radius:      10px;
+      --radius-sm:   6px;
+    }
+
+    html, body {
+      height: 100%;
+      background: #0f1f4a;
+      color: var(--text-main);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 15px;
+      line-height: 1.45;
+      overflow: hidden;
+    }
+
+    .shell {
+      display: grid;
+      grid-template-rows: auto 1fr;
+      height: 100vh;
+      min-height: 0;
+    }
+
+    .header {
+      display: grid;
+      grid-template-columns: auto 1fr auto 1fr auto;
+      align-items: center;
+      padding: 10px 28px;
+      background: #0c1a40;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      gap: 0;
+    }
+
+    .logo-wrap {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      padding-right: 24px;
+      border-right: 1px solid rgba(255,255,255,0.12);
+    }
+
+    .logo-img {
+      height: 62px;
+      width: auto;
+      object-fit: contain;
+      flex-shrink: 0;
+      filter: brightness(0) invert(1);
+    }
+
+    .school-text { display: none; }
+
+    .school-name {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 1.18rem;
+      font-weight: 600;
+      color: #ffffff;
+      letter-spacing: -0.01em;
+      line-height: 1.2;
+    }
+
+    .board-label {
+      font-size: 0.6rem;
+      font-weight: 500;
+      color: rgba(255,255,255,0.5);
+      letter-spacing: 0.13em;
+      text-transform: uppercase;
+      margin-top: 3px;
+    }
+
+    .header-divider { flex: 1; }
+
+    .clock-block {
+      text-align: center;
+      padding: 0 32px;
+    }
+
+    #live-time {
+      font-size: 2.6rem;
+      font-weight: 300;
+      color: #ffffff;
+      letter-spacing: -0.03em;
+      line-height: 1;
+      font-variant-numeric: tabular-nums;
+    }
+
+    #live-date {
+      font-size: 0.65rem;
+      font-weight: 500;
+      color: rgba(255,255,255,0.5);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-top: 3px;
+    }
+
+    .header-right {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 12px;
+      padding-left: 24px;
+      border-left: 1px solid rgba(255,255,255,0.12);
+    }
+
+    .week-pill {
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 999px;
+      padding: 5px 14px;
+      font-size: 0.68rem;
+      font-weight: 600;
+      color: rgba(255,255,255,0.75);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .live-indicator {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.62rem;
+      font-weight: 600;
+      color: var(--green);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    .live-dot {
+      width: 7px; height: 7px;
+      background: var(--green);
+      border-radius: 50%;
+      animation: pulse 2.2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.8); }
+    }
+
+    .body-grid {
+      display: grid;
+      grid-template-columns: 1.05fr 1.25fr 0.95fr;
+      gap: 14px;
+      padding: 14px 20px 14px;
+      overflow: hidden;
+      min-height: 0;
+    }
+
+    .column {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      overflow: hidden;
+      min-height: 0;
+    }
+
+    .section-card {
+      background: #ffffff;
+      border: 1px solid rgba(0,0,0,0.08);
+      border-radius: var(--radius);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    }
+
+    .section-card.flex-grow { flex: 1; min-height: 0; }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 14px;
+      background: #f8f8fa;
+      border-bottom: 1px solid rgba(0,0,0,0.07);
+      flex-shrink: 0;
+    }
+
+    .section-header::before {
+      content: '';
+      display: block;
+      width: 3px;
+      height: 16px;
+      background: var(--navy);
+      border-radius: 2px;
+      flex-shrink: 0;
+    }
+
+    .section-title {
+      font-size: 0.62rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--navy);
+    }
+
+    .section-count {
+      margin-left: auto;
+      background: rgba(27,58,140,0.08);
+      color: var(--navy);
+      font-size: 0.58rem;
+      font-weight: 600;
+      padding: 2px 7px;
+      border-radius: 999px;
+      letter-spacing: 0.04em;
+    }
+
+    .section-body {
+      padding: 10px 12px;
+      overflow: hidden;
+      flex: 1;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .trial-scroll-outer {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+      -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 8%, black 92%, transparent 100%);
+      mask-image: linear-gradient(to bottom, transparent 0%, black 8%, black 92%, transparent 100%);
+    }
+
+    .trial-scroll-inner {
+      display: flex;
+      flex-direction: column;
+      padding: 9px 10px 0;
+    }
+
+    @keyframes autoScroll {
+      0%   { transform: translateY(0); }
+      100% { transform: translateY(var(--scroll-dist)); }
+    }
+
+    .trial-grid { display: flex; flex-direction: column; gap: 6px; }
+
+    .section-carousel {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+    }
+
+    .carousel-slide {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      transition: opacity 0.7s ease;
+      pointer-events: none;
+      overflow-y: auto;
+      padding: 8px 12px;
+    }
+
+    .carousel-slide.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .carousel-slide::-webkit-scrollbar { display: none; }
+
+    .trial-card {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: #f5f6fa;
+      border: 1px solid rgba(0,0,0,0.06);
+      border-radius: var(--radius-sm);
+      padding: 8px 11px;
+    }
+
+    .trial-avatar {
+      width: 30px; height: 30px;
+      border-radius: 50%;
+      background: var(--navy);
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.68rem;
+      font-weight: 700;
+      color: #fff;
+      flex-shrink: 0;
+    }
+
+    .trial-name {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: #1a1a2e;
+      flex: 1;
+    }
+
+    .trial-day { font-size: 0.67rem; color: #666; margin-top: 1px; }
+
+    .trial-tag {
+      font-size: 0.55rem;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 999px;
+      background: rgba(27,58,140,0.1);
+      color: var(--navy);
+      border: none;
+      letter-spacing: 0.02em;
+      flex-shrink: 0;
+      white-space: nowrap;
+    }
+
+    .dates-list { display: flex; flex-direction: column; gap: 5px; }
+
+    .date-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 8px 10px;
+      background: #f5f6fa;
+      border-radius: var(--radius-sm);
+      border-left: 3px solid #c5cde0;
+    }
+
+    .date-row.urgent { border-left-color: var(--urgent); background: rgba(224,80,80,0.07); }
+    .date-row.today  { border-left-color: var(--gold); background: rgba(201,168,76,0.07); }
+    .date-row.upcoming { border-left-color: #a0aec0; }
+
+    .date-block { text-align: center; min-width: 34px; flex-shrink: 0; }
+    .date-block .d-name { font-size: 0.55rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #888; }
+    .date-block .d-num  { font-size: 1.1rem; font-weight: 700; color: #1a1a2e; line-height: 1.1; font-variant-numeric: tabular-nums; }
+    .date-block .d-mon  { font-size: 0.55rem; font-weight: 500; color: #888; text-transform: uppercase; letter-spacing: 0.06em; }
+
+    .date-block.gold-date .d-num { color: #9a7020; }
+    .date-block.urgent-date .d-num { color: var(--urgent); }
+
+    .date-detail { flex: 1; min-width: 0; }
+    .date-label  { font-size: 0.78rem; font-weight: 600; color: #1a1a2e; line-height: 1.3; }
+    .date-note   { font-size: 0.66rem; color: #555; margin-top: 2px; }
+
+    .date-badge {
+      font-size: 0.55rem; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase;
+      padding: 2px 6px; border-radius: 999px; flex-shrink: 0; align-self: flex-start;
+    }
+
+    .date-badge.today   { background: rgba(201,168,76,0.18); color: #8a6010; }
+    .date-badge.urgent  { background: rgba(224,80,80,0.1); color: var(--urgent); }
+    .date-badge.info    { background: rgba(0,0,0,0.07); color: #555; }
+
+    .ann-list { display: flex; flex-direction: column; gap: 7px; }
+
+    .ann-item {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      padding: 9px 11px;
+      background: #f5f6fa;
+      border-radius: var(--radius-sm);
+      border: 1px solid rgba(0,0,0,0.06);
+    }
+
+    .ann-item.pinned { border-color: rgba(201,168,76,0.4); background: rgba(201,168,76,0.06); }
+
+    .ann-icon {
+      width: 28px; height: 28px;
+      border-radius: var(--radius-sm);
+      background: rgba(27,58,140,0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .ann-icon svg { width: 14px; height: 14px; fill: none; stroke: var(--navy); stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+    .ann-icon.red-icon svg { stroke: var(--urgent); }
+    .ann-icon.red-icon { background: rgba(224,80,80,0.1); }
+    .ann-icon.green-icon svg { stroke: var(--green); }
+    .ann-icon.green-icon { background: rgba(78,168,106,0.1); }
+    .ann-icon.soft-icon svg { stroke: #888; }
+    .ann-icon.soft-icon { background: rgba(0,0,0,0.06); }
+
+    .ann-text { flex: 1; min-width: 0; }
+    .ann-title { font-size: 0.82rem; font-weight: 600; color: #1a1a2e; line-height: 1.3; }
+    .ann-body  { font-size: 0.7rem; color: #555; margin-top: 2px; line-height: 1.4; }
+    .ann-footer { display: flex; align-items: center; gap: 7px; margin-top: 5px; }
+
+    .ann-tag {
+      font-size: 0.57rem; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase;
+      padding: 2px 6px; border-radius: 999px;
+    }
+
+    .ann-tag.admin   { background: rgba(27,58,140,0.1); color: var(--navy); }
+    .ann-tag.staff   { background: rgba(78,168,106,0.12); color: #2e7d47; }
+    .ann-tag.urgent  { background: rgba(224,80,80,0.1); color: var(--urgent); }
+    .ann-tag.visitor { background: rgba(0,0,0,0.06); color: #555; }
+
+    .ann-time { font-size: 0.6rem; color: #888; margin-left: auto; }
+
+    .advert-section-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 14px;
+      background: #f8f8fa;
+      border-bottom: 1px solid rgba(0,0,0,0.07);
+      flex-shrink: 0;
+    }
+
+    .advert-section-header::before {
+      content: '';
+      display: block;
+      width: 3px; height: 16px;
+      background: var(--navy);
+      border-radius: 2px;
+      flex-shrink: 0;
+    }
+
+    .events-card {
+      background: #ffffff;
+      border: 1px solid rgba(0,0,0,0.08);
+      border-radius: var(--radius);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      min-height: 0;
+      overflow: hidden;
+    }
+
+    .advert-carousel {
+      position: relative;
+      flex: 1;
+      min-height: 0;
+      overflow: hidden;
+      background: #ffffff;
+    }
+
+    .advert-slide {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      opacity: 0;
+      transition: opacity 0.5s ease;
+      pointer-events: none;
+    }
+
+    .advert-slide.active { opacity: 1; pointer-events: auto; }
+
+    .advert-bg-grad {
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      background: #ffffff !important;
+    }
+
+    .advert-watermark { display: none; }
+
+    .advert-content {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      padding: 12px 14px 10px;
+    }
+
+    .advert-eyebrow {
+      font-size: 0.57rem;
+      font-weight: 700;
+      letter-spacing: 0.13em;
+      text-transform: uppercase;
+      color: var(--navy);
+      opacity: 0.5;
+      margin-bottom: 6px;
+    }
+
+    .advert-eyebrow::before { display: none; }
+
+    .advert-title {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+      color: #1a1a2e;
+      line-height: 1.25;
+      margin-bottom: 7px;
+    }
+
+    .advert-desc {
+      font-size: 0.7rem;
+      color: #555;
+      line-height: 1.5;
+      flex: 1;
+    }
+
+    .advert-meta {
+      margin-top: 10px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+    }
+
+    .advert-meta-item {
+      background: #f5f6fa;
+      border: 1px solid rgba(0,0,0,0.06);
+      border-radius: var(--radius-sm);
+      padding: 6px 9px;
+    }
+
+    .advert-meta-label {
+      font-size: 0.53rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #999;
+      margin-bottom: 2px;
+    }
+
+    .advert-meta-value {
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: #1a1a2e;
+    }
+
+    .advert-slide-divider {
+      height: 1px;
+      background: rgba(0,0,0,0.06);
+      margin: 0;
+      flex-shrink: 0;
+    }
+
+    .advert-progress {
+      position: absolute;
+      bottom: 0; left: 0;
+      height: 2px;
+      background: var(--navy);
+      z-index: 10;
+    }
+
+    .carousel-dots {
+      display: flex;
+      justify-content: center;
+      gap: 5px;
+      padding: 6px 0 8px;
+      flex-shrink: 0;
+      border-top: 1px solid rgba(0,0,0,0.05);
+    }
+
+    .dot {
+      width: 5px; height: 5px;
+      border-radius: 50%;
+      background: rgba(27,58,140,0.18);
+      border: none;
+      transition: background 0.3s, transform 0.3s;
+      cursor: pointer;
+    }
+
+    .dot.active { background: var(--navy); transform: scale(1.4); }
+
+    ::-webkit-scrollbar { width: 3px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--navy-light); border-radius: 2px; }
+
+    .empty-state {
+      text-align: center;
+      padding: 16px;
+      color: var(--text-dim);
+      font-size: 0.75rem;
+    }
+  </style>
+</head>
+<body>
+<div class="shell">
+  <header class="header">
+    <div class="logo-wrap">
+      <img class="logo-img" src="logo.png" alt="Newton Sixth Form" />
+      <div class="school-text">
+        <div class="school-name">Newton Sixth Form</div>
+        <div class="board-label">Staff Notice Board</div>
+      </div>
+    </div>
+    <div class="header-divider"></div>
+    <div class="clock-block">
+      <div id="live-time">00:00</div>
+      <div id="live-date">Loading…</div>
+    </div>
+    <div class="header-divider"></div>
+    <div class="header-right">
+      <div class="week-pill" id="week-badge">Week 1</div>
+      <div class="live-indicator"><div class="live-dot"></div>Live</div>
+    </div>
+  </header>
+
+  <div class="body-grid">
+    <!-- COL 1: Trial Students + Important Dates -->
+    <div class="column">
+      <div class="section-card" style="flex:2;min-height:0;">
+        <div class="section-header">
+          <span class="section-title">Trial Students This Week</span>
+          <span class="section-count" id="trial-count">—</span>
+        </div>
+        <div class="section-body" style="position:relative;padding:0;">
+          <div class="trial-scroll-outer" id="trial-scroll-outer">
+            <div class="trial-scroll-inner" id="trial-scroll-inner">
+              <div class="trial-grid" id="trial-list"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-card" style="flex:1;min-height:0;">
+        <div class="section-header">
+          <span class="section-title">Important Dates</span>
+          <span class="section-count" id="dates-count">—</span>
+        </div>
+        <div class="section-body" style="position:relative;padding:0;">
+          <div id="dates-carousel" style="position:absolute;inset:0;overflow:hidden;"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- COL 2: Announcements -->
+    <div class="column">
+      <div class="section-card flex-grow">
+        <div class="section-header">
+          <span class="section-title">Announcements</span>
+          <span class="section-count" id="ann-count">—</span>
+        </div>
+        <div class="section-body" style="position:relative;padding:0;">
+          <div id="ann-carousel" style="position:absolute;inset:0;overflow:hidden;"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- COL 3: Upcoming Events -->
+    <div class="column">
+      <div class="events-card">
+        <div class="advert-section-header">
+          <span class="section-title">Upcoming Events</span>
+          <span class="section-count" id="events-count">—</span>
+        </div>
+        <div class="advert-carousel" id="advert-carousel">
+          <div class="advert-progress" id="advert-progress"></div>
+        </div>
+        <div class="carousel-dots" id="carousel-dots"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+<script>
+  /* ─── FIREBASE CONFIG ───────────────────────────────────────────
+     Replace these placeholder values with your Firebase project config.
+     Get them from: Firebase Console → Project Settings → Your apps → SDK setup
+  ─────────────────────────────────────────────────────────────── */
+  var FIREBASE_CONFIG = {
+    apiKey:            "REPLACE_WITH_YOUR_API_KEY",
+    authDomain:        "REPLACE_WITH_YOUR_AUTH_DOMAIN",
+    databaseURL:       "REPLACE_WITH_YOUR_DATABASE_URL",
+    projectId:         "REPLACE_WITH_YOUR_PROJECT_ID",
+    storageBucket:     "REPLACE_WITH_YOUR_STORAGE_BUCKET",
+    messagingSenderId: "REPLACE_WITH_YOUR_MESSAGING_SENDER_ID",
+    appId:             "REPLACE_WITH_YOUR_APP_ID"
+  };
+
+  /* ─── FALLBACK DATA (shown before Firebase loads / if not configured) ── */
+  var DEFAULT_DATA = {
+    weekLabel: "Week 1 — Term 2",
+    trialStudents: [],
+    importantDates: [],
+    announcements: [],
+    events: []
+  };
+
+  /* ─── SVG ICONS ────────────────────────────────────────────── */
+  var ICONS = {
+    bell:    '<svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>',
+    lock:    '<svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>',
+    users:   '<svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>',
+    printer: '<svg viewBox="0 0 24 24"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>',
+    car:     '<svg viewBox="0 0 24 24"><path d="M5 17H3a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v9a2 2 0 0 1-2 2h-2"/><circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/></svg>',
+  };
+
+  /* ─── CLOCK ─────────────────────────────────────────────────── */
+  function updateClock() {
+    var now = new Date();
+    var h = String(now.getHours()).padStart(2,'0');
+    var m = String(now.getMinutes()).padStart(2,'0');
+    var days   = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+    var months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+    document.getElementById('live-time').textContent = h + ':' + m;
+    document.getElementById('live-date').textContent = days[now.getDay()] + ' · ' + now.getDate() + ' ' + months[now.getMonth()] + ' ' + now.getFullYear();
+  }
+  updateClock();
+  setInterval(updateClock, 15000);
+
+  /* ─── HELPERS ───────────────────────────────────────────────── */
+  function initials(n) {
+    return n.split(' ').map(function(p){ return p[0]; }).join('').substring(0,2).toUpperCase();
+  }
+
+  /* ─── RENDER FUNCTIONS ──────────────────────────────────────── */
+  function renderTrialStudents(students) {
+    var trialEl = document.getElementById('trial-list');
+    var inner   = document.getElementById('trial-scroll-inner');
+    document.getElementById('trial-count').textContent = students.length + ' visiting';
+
+    // Clear any existing clone from previous render
+    while (inner.children.length > 1) inner.removeChild(inner.lastChild);
+    inner.style.animation = 'none';
+
+    if (students.length === 0) {
+      trialEl.innerHTML = '<div class="empty-state" style="padding:12px;">No trial students this week.</div>';
+      return;
+    }
+
+    trialEl.innerHTML = students.map(function(s) {
+      var tagLabel = s.track ? s.yearGroup + ' · ' + s.track + ' · ' + s.room : s.yearGroup + ' · ' + s.room;
+      return '<div class="trial-card">' +
+        '<div class="trial-avatar">' + initials(s.name) + '</div>' +
+        '<div style="flex:1;min-width:0"><div class="trial-name">' + s.name + '</div>' +
+        '<div class="trial-day">' + s.visitDay + '</div></div>' +
+        '<span class="trial-tag">' + tagLabel + '</span>' +
+      '</div>';
+    }).join('');
+
+    requestAnimationFrame(function() { requestAnimationFrame(function() {
+      var outer = document.getElementById('trial-scroll-outer');
+      var outerH = outer.clientHeight;
+      var listH  = trialEl.scrollHeight + 9;
+      var gap    = 6;
+
+      if (listH > outerH) {
+        var clone = trialEl.cloneNode(true);
+        clone.id = '';
+        clone.style.marginTop = gap + 'px';
+        inner.appendChild(clone);
+
+        var totalH   = listH + gap;
+        var pxPerSec = 10;
+        var dur      = totalH / pxPerSec;
+
+        inner.style.setProperty('--scroll-dist', '-' + totalH + 'px');
+        inner.style.animation = 'autoScroll ' + dur + 's linear infinite';
+
+        inner.addEventListener('mouseenter', function() { inner.style.animationPlayState = 'paused'; });
+        inner.addEventListener('mouseleave', function() { inner.style.animationPlayState = 'running'; });
+      }
+    }); });
+  }
+
+  function makeDateRow(d) {
+    var numClass = d.status==='today' ? 'gold-date' : d.status==='urgent' ? 'urgent-date' : '';
+    var badge = d.badge ? '<span class="date-badge ' + (d.status==='today'?'today':d.status==='urgent'?'urgent':'info') + '">' + d.badge + '</span>' : '';
+    return '<div class="date-row ' + d.status + '">' +
+      '<div class="date-block ' + numClass + '"><div class="d-name">' + d.dayName + '</div><div class="d-num">' + d.dayNum + '</div><div class="d-mon">' + d.month + '</div></div>' +
+      '<div class="date-detail"><div class="date-label">' + d.label + '</div>' + (d.note?'<div class="date-note">'+d.note+'</div>':'') + '</div>' +
+      badge + '</div>';
+  }
+
+  function renderImportantDates(dates) {
+    var wrap = document.getElementById('dates-carousel');
+    wrap.innerHTML = '';
+    document.getElementById('dates-count').textContent = dates.length + ' dates';
+    if (dates.length === 0) {
+      wrap.innerHTML = '<div class="carousel-slide active" style="padding:8px 10px;"><div class="empty-state">No dates added.</div></div>';
+      return;
+    }
+
+    var testSlide = document.createElement('div');
+    testSlide.className = 'carousel-slide active';
+    testSlide.style.padding = '8px 10px';
+    testSlide.innerHTML = '<div class="dates-list">' + dates.map(makeDateRow).join('') + '</div>';
+    wrap.appendChild(testSlide);
+
+    requestAnimationFrame(function() { requestAnimationFrame(function() {
+      var fits = testSlide.scrollHeight <= wrap.clientHeight + 2;
+      if (fits) return;
+
+      wrap.innerHTML = '';
+      var rows = dates;
+      var pages = [];
+      var i = 0;
+      while (i < rows.length) {
+        var probe = document.createElement('div');
+        probe.className = 'carousel-slide active';
+        probe.style.padding = '8px 10px';
+        probe.style.visibility = 'hidden';
+        wrap.appendChild(probe);
+        var j = i;
+        var list = '';
+        while (j < rows.length) {
+          var trial = list + makeDateRow(rows[j]);
+          probe.innerHTML = '<div class="dates-list">' + trial + '</div>';
+          if (probe.scrollHeight > wrap.clientHeight + 2 && j > i) break;
+          list = trial;
+          j++;
+        }
+        wrap.removeChild(probe);
+        pages.push(rows.slice(i, j));
+        i = j;
+      }
+
+      pages.forEach(function(page, pi) {
+        var slide = document.createElement('div');
+        slide.className = 'carousel-slide' + (pi===0?' active':'');
+        slide.style.padding = '8px 10px';
+        slide.innerHTML = '<div class="dates-list">' + page.map(makeDateRow).join('') + '</div>';
+        wrap.appendChild(slide);
+      });
+
+      if (pages.length > 1) {
+        var slides = wrap.querySelectorAll('.carousel-slide');
+        var cur = 0;
+        setTimeout(function tick() {
+          slides[cur].classList.remove('active');
+          cur = (cur + 1) % slides.length;
+          slides[cur].classList.add('active');
+          setTimeout(tick, 7000);
+        }, 19000);
+      }
+    }); });
+  }
+
+  function makeAnnItem(a) {
+    var iconHtml = ICONS[a.iconType] || ICONS.bell;
+    var colorClass = a.iconColor==='red' ? 'red-icon' : a.iconColor==='green' ? 'green-icon' : a.iconColor==='soft' ? 'soft-icon' : '';
+    return '<div class="ann-item' + (a.pinned?' pinned':'') + '">' +
+      '<div class="ann-icon ' + colorClass + '">' + iconHtml + '</div>' +
+      '<div class="ann-text"><div class="ann-title">' + a.title + '</div>' +
+      '<div class="ann-body">' + a.body + '</div>' +
+      '<div class="ann-footer"><span class="ann-tag ' + a.tag.style + '">' + a.tag.label + '</span>' +
+      '<span class="ann-time">' + a.time + '</span></div></div></div>';
+  }
+
+  function renderAnnouncements(announcements) {
+    var wrap = document.getElementById('ann-carousel');
+    wrap.innerHTML = '';
+    document.getElementById('ann-count').textContent = announcements.length + ' notices';
+    if (announcements.length === 0) {
+      wrap.innerHTML = '<div class="carousel-slide active" style="padding:10px 12px;"><div class="empty-state">No announcements.</div></div>';
+      return;
+    }
+
+    var testSlide = document.createElement('div');
+    testSlide.className = 'carousel-slide active';
+    testSlide.style.padding = '10px 12px';
+    testSlide.innerHTML = '<div class="ann-list">' + announcements.map(makeAnnItem).join('') + '</div>';
+    wrap.appendChild(testSlide);
+
+    requestAnimationFrame(function() { requestAnimationFrame(function() {
+      var fits = testSlide.scrollHeight <= wrap.clientHeight + 2;
+      if (fits) return;
+
+      wrap.innerHTML = '';
+      var items = announcements;
+      var pages = [];
+      var i = 0;
+      while (i < items.length) {
+        var probe = document.createElement('div');
+        probe.className = 'carousel-slide active';
+        probe.style.padding = '10px 12px';
+        probe.style.visibility = 'hidden';
+        wrap.appendChild(probe);
+        var j = i;
+        var list = '';
+        while (j < items.length) {
+          var trial = list + makeAnnItem(items[j]);
+          probe.innerHTML = '<div class="ann-list">' + trial + '</div>';
+          if (probe.scrollHeight > wrap.clientHeight + 2 && j > i) break;
+          list = trial;
+          j++;
+        }
+        wrap.removeChild(probe);
+        pages.push(items.slice(i, j));
+        i = j;
+      }
+
+      pages.forEach(function(page, pi) {
+        var slide = document.createElement('div');
+        slide.className = 'carousel-slide' + (pi===0?' active':'');
+        slide.style.padding = '10px 12px';
+        slide.innerHTML = '<div class="ann-list">' + page.map(makeAnnItem).join('') + '</div>';
+        wrap.appendChild(slide);
+      });
+
+      if (pages.length > 1) {
+        var slides = wrap.querySelectorAll('.carousel-slide');
+        var cur = 0;
+        setTimeout(function tick() {
+          slides[cur].classList.remove('active');
+          cur = (cur + 1) % slides.length;
+          slides[cur].classList.add('active');
+          setTimeout(tick, 7000);
+        }, 33000);
+      }
+    }); });
+  }
+
+  var eventsCur = 0;
+  var eventsTimer = null;
+
+  function renderEvents(events) {
+    var carouselEl = document.getElementById('advert-carousel');
+    var dotsEl     = document.getElementById('carousel-dots');
+    var progEl     = document.getElementById('advert-progress');
+    var ROTATE_MS  = 7000;
+
+    // Clear existing slides (keep progEl)
+    while (carouselEl.firstChild) carouselEl.removeChild(carouselEl.firstChild);
+    carouselEl.appendChild(progEl);
+    dotsEl.innerHTML = '';
+    if (eventsTimer) clearInterval(eventsTimer);
+    eventsCur = 0;
+
+    document.getElementById('events-count').textContent = events.length + ' events';
+
+    if (events.length === 0) {
+      carouselEl.innerHTML = '<div class="empty-state" style="position:relative;z-index:2;padding:40px;">No upcoming events.</div>';
+      return;
+    }
+
+    events.forEach(function(ev, i) {
+      var slide = document.createElement('div');
+      slide.className = 'advert-slide' + (i===0?' active':'');
+      slide.innerHTML =
+        '<div class="advert-bg-grad"></div>' +
+        '<div class="advert-content">' +
+          '<div class="advert-eyebrow">' + ev.eyebrow + '</div>' +
+          '<div class="advert-title">' + ev.title + '</div>' +
+          '<div class="advert-desc">' + ev.desc + '</div>' +
+          '<div class="advert-meta">' +
+            '<div class="advert-meta-item"><div class="advert-meta-label">When</div><div class="advert-meta-value">' + ev.datetime + '</div></div>' +
+            '<div class="advert-meta-item"><div class="advert-meta-label">Where</div><div class="advert-meta-value">' + ev.location + '</div></div>' +
+          '</div>' +
+        '</div>';
+      carouselEl.insertBefore(slide, progEl);
+    });
+
+    events.forEach(function(_, i) {
+      var dot = document.createElement('div');
+      dot.className = 'dot' + (i===0?' active':'');
+      dot.addEventListener('click', function() { goTo(i); });
+      dotsEl.appendChild(dot);
+    });
+
+    var slides = carouselEl.querySelectorAll('.advert-slide');
+    var dots   = dotsEl.querySelectorAll('.dot');
+
+    function startProg() {
+      progEl.style.transition = 'none';
+      progEl.style.width = '0%';
+      void progEl.offsetWidth;
+      progEl.style.transition = 'width ' + ROTATE_MS + 'ms linear';
+      progEl.style.width = '100%';
+    }
+
+    function goTo(idx) {
+      slides[eventsCur].classList.remove('active');
+      dots[eventsCur].classList.remove('active');
+      eventsCur = (idx + events.length) % events.length;
+      slides[eventsCur].classList.add('active');
+      dots[eventsCur].classList.add('active');
+      startProg();
+    }
+
+    startProg();
+    eventsTimer = setInterval(function() { goTo(eventsCur + 1); }, ROTATE_MS);
+  }
+
+  /* ─── RENDER ALL ─────────────────────────────────────────────── */
+  function renderAll(data) {
+    document.getElementById('week-badge').textContent = data.weekLabel || 'Week 1';
+    renderTrialStudents(data.trialStudents || []);
+    renderImportantDates(data.importantDates || []);
+    renderAnnouncements(data.announcements || []);
+    renderEvents(data.events || []);
+  }
+
+  /* ─── FIREBASE INIT ──────────────────────────────────────────── */
+  var isFirebaseConfigured = FIREBASE_CONFIG.apiKey !== 'REPLACE_WITH_YOUR_API_KEY';
+
+  if (isFirebaseConfigured) {
+    try {
+      firebase.initializeApp(FIREBASE_CONFIG);
+      var db = firebase.database();
+      db.ref('noticeboard').on('value', function(snapshot) {
+        var data = snapshot.val();
+        if (data) {
+          renderAll(data);
+        } else {
+          renderAll(DEFAULT_DATA);
+        }
+      }, function(err) {
+        console.error('Firebase read error:', err);
+        renderAll(DEFAULT_DATA);
+      });
+    } catch(e) {
+      console.error('Firebase init error:', e);
+      renderAll(DEFAULT_DATA);
+    }
+  } else {
+    renderAll(DEFAULT_DATA);
+  }
+</script>
+</body>
+</html>

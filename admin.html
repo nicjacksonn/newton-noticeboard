@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Newton Sixth Form — Noticeboard Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --navy:       #1B3A8C;
+      --navy-dark:  #0E1F55;
+      --navy-mid:   #1D3D96;
+      --gold:       #C9A84C;
+      --gold-light: #E0C06A;
+      --urgent:     #E05050;
+      --green:      #4EA86A;
+      --radius:     10px;
+      --radius-sm:  6px;
+      --shadow:     0 2px 8px rgba(0,0,0,0.10);
+    }
+
+    html, body {
+      min-height: 100%;
+      background: #f0f2f8;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      color: #1a1a2e;
+    }
+
+    #login-screen {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #0c1a40 0%, #1B3A8C 100%);
+    }
+
+    .login-card {
+      background: #fff;
+      border-radius: 16px;
+      padding: 44px 40px 36px;
+      width: 380px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    }
+
+    .login-logo { text-align: center; margin-bottom: 28px; }
+
+    .login-logo-circle {
+      width: 56px; height: 56px;
+      background: var(--navy);
+      border-radius: 14px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 14px;
+    }
+
+    .login-logo-circle svg { width: 28px; height: 28px; fill: none; stroke: #fff; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+    .login-title { font-size: 1.25rem; font-weight: 700; color: var(--navy); margin-bottom: 4px; }
+    .login-subtitle { font-size: 0.78rem; color: #888; letter-spacing: 0.04em; }
+
+    .login-field { margin-bottom: 14px; }
+    .login-field label { display: block; font-size: 0.72rem; font-weight: 600; color: #555; letter-spacing: 0.05em; text-transform: uppercase; margin-bottom: 6px; }
+    .login-field input { width: 100%; padding: 10px 13px; border: 1.5px solid #dde0ec; border-radius: var(--radius-sm); font-family: inherit; font-size: 0.9rem; color: #1a1a2e; outline: none; transition: border-color 0.2s; }
+    .login-field input:focus { border-color: var(--navy); }
+
+    .login-btn { width: 100%; padding: 11px; background: var(--navy); color: #fff; border: none; border-radius: var(--radius-sm); font-family: inherit; font-size: 0.9rem; font-weight: 600; cursor: pointer; margin-top: 8px; transition: background 0.2s; }
+    .login-btn:hover { background: var(--navy-mid); }
+    .login-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+    .login-error { margin-top: 12px; padding: 9px 12px; background: rgba(224,80,80,0.09); border: 1px solid rgba(224,80,80,0.25); border-radius: var(--radius-sm); font-size: 0.78rem; color: var(--urgent); display: none; }
+
+    #admin-shell { display: none; min-height: 100vh; }
+
+    .admin-header { background: var(--navy-dark); padding: 0 28px; display: flex; align-items: center; gap: 16px; height: 58px; position: sticky; top: 0; z-index: 100; border-bottom: 1px solid rgba(255,255,255,0.08); }
+    .admin-header-title { font-size: 0.88rem; font-weight: 700; color: #fff; }
+    .admin-header-sub { font-size: 0.68rem; color: rgba(255,255,255,0.45); letter-spacing: 0.06em; text-transform: uppercase; }
+    .admin-header-right { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+
+    .save-btn { padding: 8px 20px; background: var(--gold); color: #3a2800; border: none; border-radius: var(--radius-sm); font-family: inherit; font-size: 0.8rem; font-weight: 700; cursor: pointer; transition: background 0.2s; }
+    .save-btn:hover { background: var(--gold-light); }
+    .save-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .logout-btn { padding: 8px 14px; background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.7); border: 1px solid rgba(255,255,255,0.12); border-radius: var(--radius-sm); font-family: inherit; font-size: 0.78rem; font-weight: 600; cursor: pointer; }
+    .logout-btn:hover { background: rgba(255,255,255,0.14); color: #fff; }
+
+    .save-status { font-size: 0.72rem; color: var(--green); font-weight: 600; opacity: 0; transition: opacity 0.4s; }
+    .save-status.show { opacity: 1; }
+
+    .admin-body { max-width: 960px; margin: 0 auto; padding: 28px 20px 60px; }
+
+    .section-block { background: #fff; border-radius: var(--radius); box-shadow: var(--shadow); margin-bottom: 20px; overflow: hidden; }
+
+    .section-block-header { display: flex; align-items: center; gap: 10px; padding: 14px 18px; background: #f8f9fc; border-bottom: 1px solid rgba(0,0,0,0.07); cursor: pointer; user-select: none; }
+    .section-block-header::before { content: ''; display: block; width: 3px; height: 18px; background: var(--navy); border-radius: 2px; flex-shrink: 0; }
+    .section-block-title { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.10em; text-transform: uppercase; color: var(--navy); }
+    .section-block-count { font-size: 0.65rem; font-weight: 600; color: #888; margin-left: 4px; }
+    .section-block-chevron { margin-left: auto; font-size: 0.75rem; color: #aaa; transition: transform 0.25s; }
+    .section-block.collapsed .section-block-chevron { transform: rotate(-90deg); }
+    .section-block.collapsed .section-block-body { display: none; }
+    .section-block-body { padding: 16px 18px; }
+
+    .week-row input { width: 100%; padding: 9px 12px; border: 1.5px solid #dde0ec; border-radius: var(--radius-sm); font-family: inherit; font-size: 0.9rem; color: #1a1a2e; outline: none; }
+    .week-row input:focus { border-color: var(--navy); }
+
+    .item-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 12px; }
+
+    .item-row { background: #f7f8fc; border: 1.5px solid #e8eaf2; border-radius: var(--radius-sm); padding: 12px 14px; }
+
+    .item-row-fields { display: grid; gap: 8px; }
+    .item-row-fields.cols-2 { grid-template-columns: 1fr 1fr; }
+    .item-row-fields.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+    .item-row-fields.cols-4 { grid-template-columns: 1fr 1fr 1fr 1fr; }
+
+    .field-group { display: flex; flex-direction: column; gap: 4px; }
+    .field-group label { font-size: 0.64rem; font-weight: 600; color: #888; letter-spacing: 0.06em; text-transform: uppercase; }
+    .field-group input,
+    .field-group select,
+    .field-group textarea { padding: 7px 10px; border: 1.5px solid #dde0ec; border-radius: var(--radius-sm); font-family: inherit; font-size: 0.82rem; color: #1a1a2e; background: #fff; outline: none; transition: border-color 0.2s; }
+    .field-group input:focus,
+    .field-group select:focus,
+    .field-group textarea:focus { border-color: var(--navy); }
+    .field-group textarea { resize: vertical; min-height: 60px; }
+
+    .item-row-actions { display: flex; justify-content: flex-end; margin-top: 10px; padding-top: 10px; border-top: 1px solid #eaedf5; }
+
+    .btn-delete { padding: 5px 12px; background: rgba(224,80,80,0.08); color: var(--urgent); border: 1px solid rgba(224,80,80,0.2); border-radius: var(--radius-sm); font-family: inherit; font-size: 0.74rem; font-weight: 600; cursor: pointer; }
+    .btn-delete:hover { background: rgba(224,80,80,0.15); }
+
+    .btn-add { display: flex; align-items: center; gap: 6px; padding: 8px 14px; background: rgba(27,58,140,0.07); color: var(--navy); border: 1.5px dashed rgba(27,58,140,0.25); border-radius: var(--radius-sm); font-family: inherit; font-size: 0.78rem; font-weight: 600; cursor: pointer; width: 100%; justify-content: center; }
+    .btn-add:hover { background: rgba(27,58,140,0.12); }
+
+    .pinned-label { display: flex; align-items: center; gap: 8px; font-size: 0.78rem; color: #555; cursor: pointer; padding: 6px 0; }
+    .pinned-label input[type="checkbox"] { width: 15px; height: 15px; accent-color: var(--navy); cursor: pointer; }
+
+    .setup-banner { background: rgba(201,168,76,0.12); border: 1.5px solid rgba(201,168,76,0.35); border-radius: var(--radius); padding: 16px 20px; margin-bottom: 20px; }
+    .setup-banner h3 { font-size: 0.85rem; font-weight: 700; color: #7a5c00; margin-bottom: 6px; }
+    .setup-banner p, .setup-banner li { font-size: 0.78rem; color: #5a4400; line-height: 1.55; }
+    .setup-banner ol { padding-left: 18px; margin-top: 6px; }
+    .setup-banner code { background: rgba(0,0,0,0.07); padding: 1px 5px; border-radius: 3px; font-family: monospace; font-size: 0.82em; }
+    .setup-banner a { color: var(--navy); }
+  </style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-card">
+    <div class="login-logo">
+      <div class="login-logo-circle">
+        <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+      </div>
+      <div class="login-title">Newton Sixth Form</div>
+      <div class="login-subtitle">Staff Noticeboard · Admin Portal</div>
+    </div>
+    <div class="login-field">
+      <label>Email Address</label>
+      <input type="email" id="login-email" placeholder="yourname@newton.ac.th" autocomplete="email" />
+    </div>
+    <div class="login-field">
+      <label>Password</label>
+      <input type="password" id="login-password" placeholder="••••••••" autocomplete="current-password" />
+    </div>
+    <button class="login-btn" id="login-btn">Sign In</button>
+    <div class="login-error" id="login-error"></div>
+  </div>
+</div>
+
+<!-- ADMIN -->
+<div id="admin-shell">
+  <header class="admin-header">
+    <div>
+      <div class="admin-header-title">Newton Sixth Form</div>
+      <div class="admin-header-sub">Noticeboard Admin</div>
+    </div>
+    <div class="admin-header-right">
+      <span class="save-status" id="save-status">✓ Saved</span>
+      <button class="save-btn" id="save-btn">Publish Changes</button>
+      <button class="logout-btn" id="logout-btn">Sign Out</button>
+    </div>
+  </header>
+
+  <div class="admin-body">
+
+    <div class="setup-banner" id="setup-banner" style="display:none;">
+      <h3>⚠ Firebase Not Configured — Demo Mode</h3>
+      <p>Changes you make here are not saved across devices yet. To enable live saving for all staff:</p>
+      <ol>
+        <li>Go to <a href="https://console.firebase.google.com" target="_blank">console.firebase.google.com</a> → create a free project.</li>
+        <li>Enable <strong>Realtime Database</strong> (start in test mode).</li>
+        <li>Enable <strong>Authentication → Email/Password</strong> → add staff accounts.</li>
+        <li>Copy your Firebase config and replace the <code>REPLACE_WITH_YOUR_*</code> values in both <code>index.html</code> and <code>admin.html</code>.</li>
+        <li>Set database rules: read true, write requires auth.</li>
+      </ol>
+    </div>
+
+    <!-- Week / Term -->
+    <div class="section-block" id="block-week">
+      <div class="section-block-header" id="hdr-week">
+        <span class="section-block-title">Week &amp; Term</span>
+        <span class="section-block-chevron">▼</span>
+      </div>
+      <div class="section-block-body">
+        <div class="week-row">
+          <input type="text" id="week-label" placeholder="e.g. Week 1 — Term 2" />
+        </div>
+        <p style="font-size:0.72rem;color:#888;margin-top:8px;">This text appears in the top-right pill on the main noticeboard.</p>
+      </div>
+    </div>
+
+    <!-- Trial Students -->
+    <div class="section-block" id="block-students">
+      <div class="section-block-header" id="hdr-students">
+        <span class="section-block-title">Trial Students</span>
+        <span class="section-block-count" id="count-students"></span>
+        <span class="section-block-chevron">▼</span>
+      </div>
+      <div class="section-block-body">
+        <div class="item-list" id="list-students"></div>
+        <button class="btn-add" id="add-student-btn">+ Add Student</button>
+      </div>
+    </div>
+
+    <!-- Important Dates -->
+    <div class="section-block" id="block-dates">
+      <div class="section-block-header" id="hdr-dates">
+        <span class="section-block-title">Important Dates</span>
+        <span class="section-block-count" id="count-dates"></span>
+        <span class="section-block-chevron">▼</span>
+      </div>
+      <div class="section-block-body">
+        <div class="item-list" id="list-dates"></div>
+        <button class="btn-add" id="add-date-btn">+ Add Date</button>
+      </div>
+    </div>
+
+    <!-- Announcements -->
+    <div class="section-block" id="block-announcements">
+      <div class="section-block-header" id="hdr-announcements">
+        <span class="section-block-title">Announcements</span>
+        <span class="section-block-count" id="count-announcements"></span>
+        <span class="section-block-chevron">▼</span>
+      </div>
+      <div class="section-block-body">
+        <div class="item-list" id="list-announcements"></div>
+        <button class="btn-add" id="add-announcement-btn">+ Add Announcement</button>
+      </div>
+    </div>
+
+    <!-- Events -->
+    <div class="section-block" id="block-events">
+      <div class="section-block-header" id="hdr-events">
+        <span class="section-block-title">Upcoming Events</span>
+        <span class="section-block-count" id="count-events"></span>
+        <span class="section-block-chevron">▼</span>
+      </div>
+      <div class="section-block-body">
+        <div class="item-list" id="list-events"></div>
+        <button class="btn-add" id="add-event-btn">+ Add Event</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+
+<script>
+/* ─── CONFIG — replace placeholder values with your Firebase project config ── */
+var FIREBASE_CONFIG = {
+  apiKey:            "REPLACE_WITH_YOUR_API_KEY",
+  authDomain:        "REPLACE_WITH_YOUR_AUTH_DOMAIN",
+  databaseURL:       "REPLACE_WITH_YOUR_DATABASE_URL",
+  projectId:         "REPLACE_WITH_YOUR_PROJECT_ID",
+  storageBucket:     "REPLACE_WITH_YOUR_STORAGE_BUCKET",
+  messagingSenderId: "REPLACE_WITH_YOUR_MESSAGING_SENDER_ID",
+  appId:             "REPLACE_WITH_YOUR_APP_ID"
+};
+
+/* ─── DATA — initialised first so it's always available ─────────────────── */
+var currentData = {
+  weekLabel:      'Week 1 — Term 2',
+  trialStudents:  [],
+  importantDates: [],
+  announcements:  [],
+  events:         []
+};
+
+var db   = null;
+var auth = null;
+var isConfigured = FIREBASE_CONFIG.apiKey !== 'REPLACE_WITH_YOUR_API_KEY';
+
+/* ─── FIREBASE INIT ──────────────────────────────────────────────────────── */
+if (isConfigured) {
+  firebase.initializeApp(FIREBASE_CONFIG);
+  db   = firebase.database();
+  auth = firebase.auth();
+  auth.onAuthStateChanged(function(user) {
+    if (user) { showAdmin(); } else { showLogin(); }
+  });
+} else {
+  showAdmin();
+  document.getElementById('setup-banner').style.display = 'block';
+}
+
+/* ─── AUTH ───────────────────────────────────────────────────────────────── */
+document.getElementById('login-btn').addEventListener('click', doLogin);
+document.getElementById('login-password').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') doLogin();
+});
+document.getElementById('logout-btn').addEventListener('click', doLogout);
+document.getElementById('save-btn').addEventListener('click', saveAll);
+
+function doLogin() {
+  var email    = document.getElementById('login-email').value.trim();
+  var password = document.getElementById('login-password').value;
+  var errEl    = document.getElementById('login-error');
+  var btn      = document.getElementById('login-btn');
+  errEl.style.display = 'none';
+  btn.disabled = true;
+  btn.textContent = 'Signing in…';
+
+  if (!isConfigured) {
+    showAdmin();
+    btn.disabled = false;
+    btn.textContent = 'Sign In';
+    return;
+  }
+
+  auth.signInWithEmailAndPassword(email, password)
+    .then(function() {
+      btn.disabled = false;
+      btn.textContent = 'Sign In';
+    })
+    .catch(function(err) {
+      errEl.textContent = (err.code === 'auth/wrong-password' || err.code === 'auth/user-not-found')
+        ? 'Incorrect email or password.' : err.message;
+      errEl.style.display = 'block';
+      btn.disabled = false;
+      btn.textContent = 'Sign In';
+    });
+}
+
+function doLogout() {
+  if (auth) { auth.signOut(); } else { showLogin(); }
+}
+
+function showLogin() {
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('admin-shell').style.display  = 'none';
+}
+
+function showAdmin() {
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('admin-shell').style.display  = 'block';
+  loadData();
+}
+
+/* ─── DATA LOAD / SAVE ───────────────────────────────────────────────────── */
+function loadData() {
+  if (db) {
+    db.ref('noticeboard').once('value').then(function(snap) {
+      var d = snap.val();
+      if (d) {
+        currentData.weekLabel      = d.weekLabel      || currentData.weekLabel;
+        currentData.trialStudents  = d.trialStudents  || [];
+        currentData.importantDates = d.importantDates || [];
+        currentData.announcements  = d.announcements  || [];
+        currentData.events         = d.events         || [];
+      }
+      populateUI();
+    }).catch(function() { populateUI(); });
+  } else {
+    populateUI();
+  }
+}
+
+function populateUI() {
+  document.getElementById('week-label').value = currentData.weekLabel;
+  renderStudents();
+  renderDates();
+  renderAnnouncements();
+  renderEvents();
+}
+
+function collectAll() {
+  currentData.weekLabel      = document.getElementById('week-label').value.trim();
+  currentData.trialStudents  = collectStudents();
+  currentData.importantDates = collectDates();
+  currentData.announcements  = collectAnnouncements();
+  currentData.events         = collectEvents();
+}
+
+function saveAll() {
+  collectAll();
+  var btn = document.getElementById('save-btn');
+  btn.disabled = true;
+  btn.textContent = 'Saving…';
+
+  function done() {
+    btn.disabled = false;
+    btn.textContent = 'Publish Changes';
+    var s = document.getElementById('save-status');
+    s.classList.add('show');
+    setTimeout(function() { s.classList.remove('show'); }, 2500);
+  }
+
+  if (db) {
+    db.ref('noticeboard').set(currentData).then(done).catch(function(err) {
+      btn.disabled = false;
+      btn.textContent = 'Publish Changes';
+      alert('Save failed: ' + err.message);
+    });
+  } else {
+    setTimeout(done, 400);
+  }
+}
+
+/* ─── BLOCK TOGGLE ───────────────────────────────────────────────────────── */
+['week','students','dates','announcements','events'].forEach(function(name) {
+  document.getElementById('hdr-' + name).addEventListener('click', function() {
+    document.getElementById('block-' + name).classList.toggle('collapsed');
+  });
+});
+
+/* ─── UTILS ──────────────────────────────────────────────────────────────── */
+function esc(v) {
+  return String(v == null ? '' : v)
+    .replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function sel(field, value, options) {
+  return '<select data-field="' + field + '">' +
+    options.map(function(o) {
+      var val   = typeof o === 'object' ? o.value : o;
+      var label = typeof o === 'object' ? o.label : o;
+      var sel   = String(value) === String(val) ? ' selected' : '';
+      return '<option value="' + esc(val) + '"' + sel + '>' + esc(label) + '</option>';
+    }).join('') + '</select>';
+}
+
+function inp(field, value, placeholder) {
+  return '<input type="text" data-field="' + field + '" value="' + esc(value) + '" placeholder="' + esc(placeholder || '') + '" />';
+}
+
+function txt(field, value, placeholder) {
+  return '<textarea data-field="' + field + '" placeholder="' + esc(placeholder || '') + '">' + esc(value) + '</textarea>';
+}
+
+function fld(label, html) {
+  return '<div class="field-group"><label>' + label + '</label>' + html + '</div>';
+}
+
+function updateCount(id, arr) {
+  document.getElementById(id).textContent = '(' + arr.length + ')';
+}
+
+/* ─── TRIAL STUDENTS ─────────────────────────────────────────────────────── */
+var YEAR_GROUPS = ['Year 8','Year 9','Year 12','Year 13'];
+var TRACKS      = [{value:'',label:'— None —'},'HUM','ENG','MED'];
+var ROOMS       = ['A','B','C','D'];
+
+document.getElementById('add-student-btn').addEventListener('click', function() {
+  collectAll();
+  currentData.trialStudents.push({ name:'', yearGroup:'Year 12', track:'', room:'A', visitDay:'' });
+  renderStudents();
+});
+
+document.getElementById('list-students').addEventListener('click', function(e) {
+  var btn = e.target.closest('.btn-delete');
+  if (!btn) return;
+  collectAll();
+  currentData.trialStudents.splice(parseInt(btn.dataset.index), 1);
+  renderStudents();
+});
+
+function renderStudents() {
+  var list = document.getElementById('list-students');
+  list.innerHTML = currentData.trialStudents.map(function(s, i) {
+    return '<div class="item-row">' +
+      '<div class="item-row-fields cols-2">' +
+        fld('Full Name', inp('name', s.name, 'e.g. Somchai Jaidee (Name)')) +
+        fld('Visit Days', inp('visitDay', s.visitDay, 'e.g. Mon – Fri')) +
+        fld('Year Group', sel('yearGroup', s.yearGroup, YEAR_GROUPS)) +
+        fld('Track (Y12/13 only)', sel('track', s.track, TRACKS)) +
+        fld('Room', sel('room', s.room, ROOMS)) +
+      '</div>' +
+      '<div class="item-row-actions"><button class="btn-delete" data-index="' + i + '">Remove</button></div>' +
+    '</div>';
+  }).join('');
+  updateCount('count-students', currentData.trialStudents);
+}
+
+function collectStudents() {
+  return Array.from(document.querySelectorAll('#list-students .item-row')).map(function(row) {
+    return {
+      name:      row.querySelector('[data-field="name"]').value.trim(),
+      visitDay:  row.querySelector('[data-field="visitDay"]').value.trim(),
+      yearGroup: row.querySelector('[data-field="yearGroup"]').value,
+      track:     row.querySelector('[data-field="track"]').value,
+      room:      row.querySelector('[data-field="room"]').value
+    };
+  });
+}
+
+/* ─── IMPORTANT DATES ────────────────────────────────────────────────────── */
+var DATE_STATUSES = ['today','urgent','upcoming','normal'];
+
+document.getElementById('add-date-btn').addEventListener('click', function() {
+  collectAll();
+  currentData.importantDates.push({ dayName:'', dayNum:'', month:'', label:'', note:'', status:'normal', badge:'' });
+  renderDates();
+});
+
+document.getElementById('list-dates').addEventListener('click', function(e) {
+  var btn = e.target.closest('.btn-delete');
+  if (!btn) return;
+  collectAll();
+  currentData.importantDates.splice(parseInt(btn.dataset.index), 1);
+  renderDates();
+});
+
+function renderDates() {
+  var list = document.getElementById('list-dates');
+  list.innerHTML = currentData.importantDates.map(function(d, i) {
+    return '<div class="item-row">' +
+      '<div class="item-row-fields cols-4">' +
+        fld('Day Name', inp('dayName', d.dayName, 'Mon')) +
+        fld('Day Number', inp('dayNum', d.dayNum, '24')) +
+        fld('Month', inp('month', d.month, 'Jun')) +
+        fld('Status', sel('status', d.status, DATE_STATUSES)) +
+      '</div>' +
+      '<div class="item-row-fields" style="margin-top:8px;">' +
+        fld('Event Label', inp('label', d.label, 'e.g. Staff Briefing — Room 4')) +
+      '</div>' +
+      '<div class="item-row-fields cols-2" style="margin-top:8px;">' +
+        fld('Note (optional)', inp('note', d.note, 'e.g. 8:00 AM sharp')) +
+        fld('Badge (optional)', inp('badge', d.badge || '', 'e.g. Today / Urgent / Info')) +
+      '</div>' +
+      '<div class="item-row-actions"><button class="btn-delete" data-index="' + i + '">Remove</button></div>' +
+    '</div>';
+  }).join('');
+  updateCount('count-dates', currentData.importantDates);
+}
+
+function collectDates() {
+  return Array.from(document.querySelectorAll('#list-dates .item-row')).map(function(row) {
+    var badge = row.querySelector('[data-field="badge"]').value.trim();
+    return {
+      dayName: row.querySelector('[data-field="dayName"]').value.trim(),
+      dayNum:  row.querySelector('[data-field="dayNum"]').value.trim(),
+      month:   row.querySelector('[data-field="month"]').value.trim(),
+      label:   row.querySelector('[data-field="label"]').value.trim(),
+      note:    row.querySelector('[data-field="note"]').value.trim(),
+      status:  row.querySelector('[data-field="status"]').value,
+      badge:   badge || null
+    };
+  });
+}
+
+/* ─── ANNOUNCEMENTS ──────────────────────────────────────────────────────── */
+var ICON_TYPES  = ['bell','lock','users','printer','car'];
+var ICON_COLORS = ['gold','red','green','soft'];
+var TAG_STYLES  = ['admin','staff','urgent','visitor'];
+
+document.getElementById('add-announcement-btn').addEventListener('click', function() {
+  collectAll();
+  currentData.announcements.push({ iconType:'bell', iconColor:'gold', pinned:false, title:'', body:'', tag:{ label:'Admin', style:'admin' }, time:'Posted today' });
+  renderAnnouncements();
+});
+
+document.getElementById('list-announcements').addEventListener('click', function(e) {
+  var btn = e.target.closest('.btn-delete');
+  if (!btn) return;
+  collectAll();
+  currentData.announcements.splice(parseInt(btn.dataset.index), 1);
+  renderAnnouncements();
+});
+
+function renderAnnouncements() {
+  var list = document.getElementById('list-announcements');
+  list.innerHTML = currentData.announcements.map(function(a, i) {
+    var tagLabel = (a.tag && a.tag.label) || '';
+    var tagStyle = (a.tag && a.tag.style) || 'admin';
+    var pinned   = a.pinned ? ' checked' : '';
+    return '<div class="item-row">' +
+      '<div class="item-row-fields cols-3">' +
+        fld('Icon', sel('iconType', a.iconType, ICON_TYPES)) +
+        fld('Icon Colour', sel('iconColor', a.iconColor, ICON_COLORS)) +
+        fld('Tag Style', sel('tagStyle', tagStyle, TAG_STYLES)) +
+      '</div>' +
+      '<div class="item-row-fields cols-2" style="margin-top:8px;">' +
+        fld('Title', inp('title', a.title, '')) +
+        fld('Tag Label', inp('tagLabel', tagLabel, 'e.g. Admin')) +
+      '</div>' +
+      '<div class="item-row-fields" style="margin-top:8px;">' +
+        fld('Body Text', txt('body', a.body, '')) +
+      '</div>' +
+      '<div class="item-row-fields cols-2" style="margin-top:8px;">' +
+        fld('Time Label', inp('time', a.time, 'e.g. Posted today')) +
+        '<div class="field-group" style="justify-content:flex-end;padding-top:22px;">' +
+          '<label class="pinned-label"><input type="checkbox" data-field="pinned"' + pinned + ' /> Pin (gold border)</label>' +
+        '</div>' +
+      '</div>' +
+      '<div class="item-row-actions"><button class="btn-delete" data-index="' + i + '">Remove</button></div>' +
+    '</div>';
+  }).join('');
+  updateCount('count-announcements', currentData.announcements);
+}
+
+function collectAnnouncements() {
+  return Array.from(document.querySelectorAll('#list-announcements .item-row')).map(function(row) {
+    return {
+      iconType:  row.querySelector('[data-field="iconType"]').value,
+      iconColor: row.querySelector('[data-field="iconColor"]').value,
+      pinned:    row.querySelector('[data-field="pinned"]').checked,
+      title:     row.querySelector('[data-field="title"]').value.trim(),
+      body:      row.querySelector('[data-field="body"]').value.trim(),
+      tag: {
+        label: row.querySelector('[data-field="tagLabel"]').value.trim(),
+        style: row.querySelector('[data-field="tagStyle"]').value
+      },
+      time: row.querySelector('[data-field="time"]').value.trim()
+    };
+  });
+}
+
+/* ─── EVENTS ─────────────────────────────────────────────────────────────── */
+document.getElementById('add-event-btn').addEventListener('click', function() {
+  collectAll();
+  currentData.events.push({ eyebrow:'', title:'', desc:'', datetime:'', location:'' });
+  renderEvents();
+});
+
+document.getElementById('list-events').addEventListener('click', function(e) {
+  var btn = e.target.closest('.btn-delete');
+  if (!btn) return;
+  collectAll();
+  currentData.events.splice(parseInt(btn.dataset.index), 1);
+  renderEvents();
+});
+
+function renderEvents() {
+  var list = document.getElementById('list-events');
+  list.innerHTML = currentData.events.map(function(ev, i) {
+    return '<div class="item-row">' +
+      '<div class="item-row-fields cols-2">' +
+        fld('Eyebrow Label', inp('eyebrow', ev.eyebrow, 'e.g. This Weekend / Year 12')) +
+        fld('Event Title', inp('title', ev.title, '')) +
+        fld('Date &amp; Time', inp('datetime', ev.datetime, 'e.g. Sat 28 June · 9:00 AM')) +
+        fld('Location', inp('location', ev.location, 'e.g. Room 3, Floor 9')) +
+      '</div>' +
+      '<div class="item-row-fields" style="margin-top:8px;">' +
+        fld('Description', txt('desc', ev.desc, '')) +
+      '</div>' +
+      '<div class="item-row-actions"><button class="btn-delete" data-index="' + i + '">Remove</button></div>' +
+    '</div>';
+  }).join('');
+  updateCount('count-events', currentData.events);
+}
+
+function collectEvents() {
+  return Array.from(document.querySelectorAll('#list-events .item-row')).map(function(row) {
+    return {
+      eyebrow:  row.querySelector('[data-field="eyebrow"]').value.trim(),
+      title:    row.querySelector('[data-field="title"]').value.trim(),
+      desc:     row.querySelector('[data-field="desc"]').value.trim(),
+      datetime: row.querySelector('[data-field="datetime"]').value.trim(),
+      location: row.querySelector('[data-field="location"]').value.trim()
+    };
+  });
+}
+</script>
+</body>
+</html>
