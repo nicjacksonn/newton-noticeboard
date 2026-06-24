@@ -1062,13 +1062,27 @@ document.getElementById('admin-toggle').addEventListener('click', function() {
   }
 });
 
+/* True once populateAdminUI() has run — guards collectAll() from reading empty lists */
+var adminWasPopulated = false;
+
+function safeCollectAndSave() {
+  if (adminWasPopulated) {
+    try { collectAll(); } catch(e) {}
+  }
+  saveToStorage();
+}
+
 function closeOverlay() {
+  safeCollectAndSave(); /* persist whatever the admin has typed, even without Publish */
   document.getElementById('admin-overlay').style.display = 'none';
   document.body.style.overflow = '';
 }
 
 document.getElementById('close-admin-btn').addEventListener('click', closeOverlay);
 document.getElementById('login-back-btn').addEventListener('click', closeOverlay);
+
+/* Save on any page unload — catches accidental refreshes */
+window.addEventListener('beforeunload', safeCollectAndSave);
 
 function showLoginPanel() {
   document.getElementById('admin-login').style.display = 'flex';
@@ -1079,6 +1093,7 @@ function showEditor() {
   document.getElementById('admin-login').style.display  = 'none';
   document.getElementById('admin-editor').style.display = 'block';
   populateAdminUI();
+  adminWasPopulated = true;
 }
 
 /* ══════════════════════════════════════════════════════════
