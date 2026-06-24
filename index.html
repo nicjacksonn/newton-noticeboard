@@ -158,23 +158,29 @@
       50%       { opacity: 0.4; transform: scale(0.8); }
     }
 
-    /* Admin toggle button — subtle, in the header */
+    /* Admin toggle button */
     #admin-toggle {
-      background: none;
-      border: 1px solid transparent;
-      color: rgba(255,255,255,0.28);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.18);
+      color: rgba(255,255,255,0.75);
       cursor: pointer;
-      font-size: 0.95rem;
-      padding: 5px 8px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      font-family: 'DM Sans', sans-serif;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 6px 12px;
       border-radius: var(--radius-sm);
       transition: color 0.2s, background 0.2s, border-color 0.2s;
-      line-height: 1;
-      margin-left: 4px;
+      margin-left: 6px;
     }
     #admin-toggle:hover {
-      color: rgba(255,255,255,0.85);
-      background: rgba(255,255,255,0.09);
-      border-color: rgba(255,255,255,0.15);
+      color: #fff;
+      background: rgba(255,255,255,0.15);
+      border-color: rgba(255,255,255,0.3);
     }
 
     /* ─── BODY GRID ─────────────────────────────────────────────── */
@@ -622,7 +628,7 @@
 <div class="shell">
   <header class="header">
     <div class="logo-wrap">
-      <img class="logo-img" id="logo-img" src="logo.png" alt="Newton Sixth Form"
+      <img class="logo-img" id="logo-img" src="logo.png" alt=""
            onload="this.style.display='block'; document.getElementById('school-text').style.display='none';"
            onerror="this.style.display='none';" />
       <div class="school-text" id="school-text">
@@ -639,7 +645,7 @@
     <div class="header-right">
       <div class="week-pill" id="week-badge">Week 1</div>
       <div class="live-indicator"><div class="live-dot"></div>Live</div>
-      <button id="admin-toggle" title="Staff Admin">⚙</button>
+      <button id="admin-toggle" title="Staff Admin">⚙ Admin</button>
     </div>
   </header>
 
