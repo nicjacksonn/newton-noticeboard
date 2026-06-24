@@ -8,6 +8,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet" />
   <style>
+    /* ─── RESET ────────────────────────────────────────────────── */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
@@ -18,23 +19,15 @@
       --navy-light:  #243FA0;
       --gold:        #C9A84C;
       --gold-light:  #E0C06A;
-      --gold-pale:   #F0D88A;
-      --gold-dim:    #8A6F2E;
-      --white:       #FFFFFF;
-      --off-white:   #F4F2EC;
-      --text-main:   #EEF0F8;
-      --text-soft:   #B8C4E0;
-      --text-dim:    #7A8EC4;
-      --border:      rgba(201,168,76,0.18);
-      --border-sub:  rgba(255,255,255,0.08);
       --urgent:      #E05050;
-      --urgent-pale: rgba(224,80,80,0.12);
       --green:       #4EA86A;
-      --green-pale:  rgba(78,168,106,0.12);
+      --text-main:   #EEF0F8;
+      --text-dim:    #7A8EC4;
       --radius:      10px;
       --radius-sm:   6px;
     }
 
+    /* body overflow managed by JS when admin overlay opens */
     html, body {
       height: 100%;
       background: #0f1f4a;
@@ -42,14 +35,15 @@
       font-family: 'DM Sans', sans-serif;
       font-size: 15px;
       line-height: 1.45;
-      overflow: hidden;
     }
 
+    /* ─── NOTICEBOARD SHELL ─────────────────────────────────────── */
     .shell {
       display: grid;
       grid-template-rows: auto 1fr;
       height: 100vh;
       min-height: 0;
+      overflow: hidden;
     }
 
     .header {
@@ -59,31 +53,31 @@
       padding: 10px 28px;
       background: #0c1a40;
       border-bottom: 1px solid rgba(255,255,255,0.1);
-      gap: 0;
     }
 
     .logo-wrap {
       display: flex;
       align-items: center;
-      gap: 0;
       padding-right: 24px;
       border-right: 1px solid rgba(255,255,255,0.12);
+      gap: 12px;
     }
 
+    /* Logo: hidden by default; shown by JS onload */
     .logo-img {
       height: 62px;
       width: auto;
       object-fit: contain;
-      flex-shrink: 0;
       filter: brightness(0) invert(1);
+      display: none;
     }
 
-    .school-text { display: none; }
+    /* School text: visible by default as fallback; hidden by JS if logo loads */
+    .school-text { display: flex; flex-direction: column; }
 
     .school-name {
-      font-family: 'DM Sans', sans-serif;
       font-size: 1.18rem;
-      font-weight: 600;
+      font-weight: 700;
       color: #ffffff;
       letter-spacing: -0.01em;
       line-height: 1.2;
@@ -100,10 +94,7 @@
 
     .header-divider { flex: 1; }
 
-    .clock-block {
-      text-align: center;
-      padding: 0 32px;
-    }
+    .clock-block { text-align: center; padding: 0 32px; }
 
     #live-time {
       font-size: 2.6rem;
@@ -127,7 +118,7 @@
       display: flex;
       justify-content: flex-end;
       align-items: center;
-      gap: 12px;
+      gap: 10px;
       padding-left: 24px;
       border-left: 1px solid rgba(255,255,255,0.12);
     }
@@ -164,14 +155,34 @@
 
     @keyframes pulse {
       0%, 100% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.4; transform: scale(0.8); }
+      50%       { opacity: 0.4; transform: scale(0.8); }
     }
 
+    /* Admin toggle button — subtle, in the header */
+    #admin-toggle {
+      background: none;
+      border: 1px solid transparent;
+      color: rgba(255,255,255,0.28);
+      cursor: pointer;
+      font-size: 0.95rem;
+      padding: 5px 8px;
+      border-radius: var(--radius-sm);
+      transition: color 0.2s, background 0.2s, border-color 0.2s;
+      line-height: 1;
+      margin-left: 4px;
+    }
+    #admin-toggle:hover {
+      color: rgba(255,255,255,0.85);
+      background: rgba(255,255,255,0.09);
+      border-color: rgba(255,255,255,0.15);
+    }
+
+    /* ─── BODY GRID ─────────────────────────────────────────────── */
     .body-grid {
       display: grid;
       grid-template-columns: 1.05fr 1.25fr 0.95fr;
       gap: 14px;
-      padding: 14px 20px 14px;
+      padding: 14px 20px;
       overflow: hidden;
       min-height: 0;
     }
@@ -184,6 +195,7 @@
       min-height: 0;
     }
 
+    /* ─── SECTION CARD ──────────────────────────────────────────── */
     .section-card {
       background: #ffffff;
       border: 1px solid rgba(0,0,0,0.08);
@@ -209,8 +221,7 @@
     .section-header::before {
       content: '';
       display: block;
-      width: 3px;
-      height: 16px;
+      width: 3px; height: 16px;
       background: var(--navy);
       border-radius: 2px;
       flex-shrink: 0;
@@ -232,7 +243,6 @@
       font-weight: 600;
       padding: 2px 7px;
       border-radius: 999px;
-      letter-spacing: 0.04em;
     }
 
     .section-body {
@@ -244,6 +254,7 @@
       flex-direction: column;
     }
 
+    /* ─── TRIAL STUDENTS ────────────────────────────────────────── */
     .trial-scroll-outer {
       position: absolute;
       inset: 0;
@@ -265,29 +276,6 @@
 
     .trial-grid { display: flex; flex-direction: column; gap: 6px; }
 
-    .section-carousel {
-      position: absolute;
-      inset: 0;
-      overflow: hidden;
-    }
-
-    .carousel-slide {
-      position: absolute;
-      inset: 0;
-      opacity: 0;
-      transition: opacity 0.7s ease;
-      pointer-events: none;
-      overflow-y: auto;
-      padding: 8px 12px;
-    }
-
-    .carousel-slide.active {
-      opacity: 1;
-      pointer-events: auto;
-    }
-
-    .carousel-slide::-webkit-scrollbar { display: none; }
-
     .trial-card {
       display: flex;
       align-items: center;
@@ -302,7 +290,6 @@
       width: 30px; height: 30px;
       border-radius: 50%;
       background: var(--navy);
-      border: none;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -312,14 +299,8 @@
       flex-shrink: 0;
     }
 
-    .trial-name {
-      font-size: 0.82rem;
-      font-weight: 600;
-      color: #1a1a2e;
-      flex: 1;
-    }
-
-    .trial-day { font-size: 0.67rem; color: #666; margin-top: 1px; }
+    .trial-name { font-size: 0.82rem; font-weight: 600; color: #1a1a2e; flex: 1; }
+    .trial-day  { font-size: 0.67rem; color: #666; margin-top: 1px; }
 
     .trial-tag {
       font-size: 0.55rem;
@@ -328,12 +309,24 @@
       border-radius: 999px;
       background: rgba(27,58,140,0.1);
       color: var(--navy);
-      border: none;
-      letter-spacing: 0.02em;
       flex-shrink: 0;
       white-space: nowrap;
     }
 
+    /* ─── CAROUSEL (dates + announcements) ─────────────────────── */
+    .carousel-slide {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      transition: opacity 0.7s ease;
+      pointer-events: none;
+      overflow-y: auto;
+      padding: 8px 12px;
+    }
+    .carousel-slide.active { opacity: 1; pointer-events: auto; }
+    .carousel-slide::-webkit-scrollbar { display: none; }
+
+    /* ─── IMPORTANT DATES ───────────────────────────────────────── */
     .dates-list { display: flex; flex-direction: column; gap: 5px; }
 
     .date-row {
@@ -345,17 +338,15 @@
       border-radius: var(--radius-sm);
       border-left: 3px solid #c5cde0;
     }
-
-    .date-row.urgent { border-left-color: var(--urgent); background: rgba(224,80,80,0.07); }
-    .date-row.today  { border-left-color: var(--gold); background: rgba(201,168,76,0.07); }
-    .date-row.upcoming { border-left-color: #a0aec0; }
+    .date-row.urgent  { border-left-color: var(--urgent); background: rgba(224,80,80,0.07); }
+    .date-row.today   { border-left-color: var(--gold);   background: rgba(201,168,76,0.07); }
+    .date-row.upcoming{ border-left-color: #a0aec0; }
 
     .date-block { text-align: center; min-width: 34px; flex-shrink: 0; }
     .date-block .d-name { font-size: 0.55rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #888; }
     .date-block .d-num  { font-size: 1.1rem; font-weight: 700; color: #1a1a2e; line-height: 1.1; font-variant-numeric: tabular-nums; }
     .date-block .d-mon  { font-size: 0.55rem; font-weight: 500; color: #888; text-transform: uppercase; letter-spacing: 0.06em; }
-
-    .date-block.gold-date .d-num { color: #9a7020; }
+    .date-block.gold-date .d-num   { color: #9a7020; }
     .date-block.urgent-date .d-num { color: var(--urgent); }
 
     .date-detail { flex: 1; min-width: 0; }
@@ -366,11 +357,11 @@
       font-size: 0.55rem; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase;
       padding: 2px 6px; border-radius: 999px; flex-shrink: 0; align-self: flex-start;
     }
+    .date-badge.today  { background: rgba(201,168,76,0.18); color: #8a6010; }
+    .date-badge.urgent { background: rgba(224,80,80,0.1);   color: var(--urgent); }
+    .date-badge.info   { background: rgba(0,0,0,0.07);      color: #555; }
 
-    .date-badge.today   { background: rgba(201,168,76,0.18); color: #8a6010; }
-    .date-badge.urgent  { background: rgba(224,80,80,0.1); color: var(--urgent); }
-    .date-badge.info    { background: rgba(0,0,0,0.07); color: #555; }
-
+    /* ─── ANNOUNCEMENTS ─────────────────────────────────────────── */
     .ann-list { display: flex; flex-direction: column; gap: 7px; }
 
     .ann-item {
@@ -382,223 +373,259 @@
       border-radius: var(--radius-sm);
       border: 1px solid rgba(0,0,0,0.06);
     }
-
     .ann-item.pinned { border-color: rgba(201,168,76,0.4); background: rgba(201,168,76,0.06); }
 
     .ann-icon {
       width: 28px; height: 28px;
       border-radius: var(--radius-sm);
       background: rgba(27,58,140,0.1);
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      display: flex; align-items: center; justify-content: center;
       flex-shrink: 0;
     }
-
     .ann-icon svg { width: 14px; height: 14px; fill: none; stroke: var(--navy); stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+    .ann-icon.red-icon   { background: rgba(224,80,80,0.1); }
     .ann-icon.red-icon svg { stroke: var(--urgent); }
-    .ann-icon.red-icon { background: rgba(224,80,80,0.1); }
-    .ann-icon.green-icon svg { stroke: var(--green); }
     .ann-icon.green-icon { background: rgba(78,168,106,0.1); }
-    .ann-icon.soft-icon svg { stroke: #888; }
-    .ann-icon.soft-icon { background: rgba(0,0,0,0.06); }
+    .ann-icon.green-icon svg { stroke: var(--green); }
+    .ann-icon.soft-icon  { background: rgba(0,0,0,0.06); }
+    .ann-icon.soft-icon svg  { stroke: #888; }
 
-    .ann-text { flex: 1; min-width: 0; }
+    .ann-text  { flex: 1; min-width: 0; }
     .ann-title { font-size: 0.82rem; font-weight: 600; color: #1a1a2e; line-height: 1.3; }
     .ann-body  { font-size: 0.7rem; color: #555; margin-top: 2px; line-height: 1.4; }
-    .ann-footer { display: flex; align-items: center; gap: 7px; margin-top: 5px; }
+    .ann-footer{ display: flex; align-items: center; gap: 7px; margin-top: 5px; }
+    .ann-time  { font-size: 0.6rem; color: #888; margin-left: auto; }
 
-    .ann-tag {
-      font-size: 0.57rem; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase;
-      padding: 2px 6px; border-radius: 999px;
-    }
-
-    .ann-tag.admin   { background: rgba(27,58,140,0.1); color: var(--navy); }
+    .ann-tag { font-size: 0.57rem; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; padding: 2px 6px; border-radius: 999px; }
+    .ann-tag.admin   { background: rgba(27,58,140,0.1);  color: var(--navy); }
     .ann-tag.staff   { background: rgba(78,168,106,0.12); color: #2e7d47; }
-    .ann-tag.urgent  { background: rgba(224,80,80,0.1); color: var(--urgent); }
-    .ann-tag.visitor { background: rgba(0,0,0,0.06); color: #555; }
+    .ann-tag.urgent  { background: rgba(224,80,80,0.1);  color: var(--urgent); }
+    .ann-tag.visitor { background: rgba(0,0,0,0.06);     color: #555; }
 
-    .ann-time { font-size: 0.6rem; color: #888; margin-left: auto; }
-
+    /* ─── EVENTS CAROUSEL ───────────────────────────────────────── */
     .advert-section-header {
-      display: flex;
-      align-items: center;
-      gap: 8px;
+      display: flex; align-items: center; gap: 8px;
       padding: 8px 14px;
       background: #f8f8fa;
       border-bottom: 1px solid rgba(0,0,0,0.07);
       flex-shrink: 0;
     }
-
     .advert-section-header::before {
-      content: '';
-      display: block;
+      content: ''; display: block;
       width: 3px; height: 16px;
-      background: var(--navy);
-      border-radius: 2px;
-      flex-shrink: 0;
+      background: var(--navy); border-radius: 2px; flex-shrink: 0;
     }
 
     .events-card {
-      background: #ffffff;
+      background: #fff;
       border: 1px solid rgba(0,0,0,0.08);
       border-radius: var(--radius);
       box-shadow: 0 1px 4px rgba(0,0,0,0.08);
-      display: flex;
-      flex-direction: column;
-      flex: 1;
-      min-height: 0;
-      overflow: hidden;
+      display: flex; flex-direction: column;
+      flex: 1; min-height: 0; overflow: hidden;
     }
 
     .advert-carousel {
-      position: relative;
-      flex: 1;
-      min-height: 0;
-      overflow: hidden;
-      background: #ffffff;
+      position: relative; flex: 1; min-height: 0;
+      overflow: hidden; background: #fff;
     }
 
     .advert-slide {
-      position: absolute;
-      inset: 0;
-      display: flex;
-      flex-direction: column;
-      opacity: 0;
-      transition: opacity 0.5s ease;
+      position: absolute; inset: 0;
+      display: flex; flex-direction: column;
+      opacity: 0; transition: opacity 0.5s ease;
       pointer-events: none;
     }
-
     .advert-slide.active { opacity: 1; pointer-events: auto; }
 
-    .advert-bg-grad {
-      position: absolute;
-      inset: 0;
-      z-index: 0;
-      background: #ffffff !important;
-    }
-
-    .advert-watermark { display: none; }
+    .advert-bg-grad { position: absolute; inset: 0; z-index: 0; background: #fff; }
 
     .advert-content {
-      position: relative;
-      z-index: 2;
-      display: flex;
-      flex-direction: column;
-      height: 100%;
-      padding: 12px 14px 10px;
+      position: relative; z-index: 2;
+      display: flex; flex-direction: column;
+      height: 100%; padding: 12px 14px 10px;
     }
 
     .advert-eyebrow {
-      font-size: 0.57rem;
-      font-weight: 700;
-      letter-spacing: 0.13em;
-      text-transform: uppercase;
-      color: var(--navy);
-      opacity: 0.5;
-      margin-bottom: 6px;
+      font-size: 0.57rem; font-weight: 700; letter-spacing: 0.13em; text-transform: uppercase;
+      color: var(--navy); opacity: 0.5; margin-bottom: 6px;
     }
 
-    .advert-eyebrow::before { display: none; }
+    .advert-title { font-size: 1rem; font-weight: 700; color: #1a1a2e; line-height: 1.25; margin-bottom: 7px; }
+    .advert-desc  { font-size: 0.7rem; color: #555; line-height: 1.5; flex: 1; }
 
-    .advert-title {
-      font-family: 'DM Sans', sans-serif;
-      font-size: 1rem;
-      font-weight: 700;
-      color: #1a1a2e;
-      line-height: 1.25;
-      margin-bottom: 7px;
-    }
-
-    .advert-desc {
-      font-size: 0.7rem;
-      color: #555;
-      line-height: 1.5;
-      flex: 1;
-    }
-
-    .advert-meta {
-      margin-top: 10px;
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 6px;
-    }
+    .advert-meta { margin-top: 10px; display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
 
     .advert-meta-item {
-      background: #f5f6fa;
-      border: 1px solid rgba(0,0,0,0.06);
-      border-radius: var(--radius-sm);
-      padding: 6px 9px;
+      background: #f5f6fa; border: 1px solid rgba(0,0,0,0.06);
+      border-radius: var(--radius-sm); padding: 6px 9px;
     }
+    .advert-meta-label { font-size: 0.53rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #999; margin-bottom: 2px; }
+    .advert-meta-value { font-size: 0.72rem; font-weight: 600; color: #1a1a2e; }
 
-    .advert-meta-label {
-      font-size: 0.53rem;
-      font-weight: 700;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      color: #999;
-      margin-bottom: 2px;
-    }
+    .advert-progress { position: absolute; bottom: 0; left: 0; height: 2px; background: var(--navy); z-index: 10; }
 
-    .advert-meta-value {
-      font-size: 0.72rem;
-      font-weight: 600;
-      color: #1a1a2e;
-    }
-
-    .advert-slide-divider {
-      height: 1px;
-      background: rgba(0,0,0,0.06);
-      margin: 0;
-      flex-shrink: 0;
-    }
-
-    .advert-progress {
-      position: absolute;
-      bottom: 0; left: 0;
-      height: 2px;
-      background: var(--navy);
-      z-index: 10;
-    }
-
-    .carousel-dots {
-      display: flex;
-      justify-content: center;
-      gap: 5px;
-      padding: 6px 0 8px;
-      flex-shrink: 0;
-      border-top: 1px solid rgba(0,0,0,0.05);
-    }
-
-    .dot {
-      width: 5px; height: 5px;
-      border-radius: 50%;
-      background: rgba(27,58,140,0.18);
-      border: none;
-      transition: background 0.3s, transform 0.3s;
-      cursor: pointer;
-    }
-
+    .carousel-dots { display: flex; justify-content: center; gap: 5px; padding: 6px 0 8px; flex-shrink: 0; border-top: 1px solid rgba(0,0,0,0.05); }
+    .dot { width: 5px; height: 5px; border-radius: 50%; background: rgba(27,58,140,0.18); border: none; transition: background 0.3s, transform 0.3s; cursor: pointer; }
     .dot.active { background: var(--navy); transform: scale(1.4); }
+
+    .empty-state { text-align: center; padding: 16px; color: #aaa; font-size: 0.75rem; }
 
     ::-webkit-scrollbar { width: 3px; }
     ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb { background: var(--navy-light); border-radius: 2px; }
 
-    .empty-state {
-      text-align: center;
-      padding: 16px;
-      color: var(--text-dim);
-      font-size: 0.75rem;
+    /* ════════════════════════════════════════════════════════════
+       ADMIN OVERLAY
+    ════════════════════════════════════════════════════════════ */
+    #admin-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 999;
+      background: #f0f2f8;
+      overflow-y: auto;
+      display: none;
     }
+
+    /* Login screen inside overlay */
+    #admin-login {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #0c1a40 0%, #1B3A8C 100%);
+    }
+
+    .login-card {
+      background: #fff;
+      border-radius: 16px;
+      padding: 44px 40px 36px;
+      width: 380px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    }
+
+    .login-logo { text-align: center; margin-bottom: 28px; }
+
+    .login-logo-circle {
+      width: 56px; height: 56px;
+      background: var(--navy);
+      border-radius: 14px;
+      display: inline-flex; align-items: center; justify-content: center;
+      margin-bottom: 14px;
+    }
+    .login-logo-circle svg { width: 28px; height: 28px; fill: none; stroke: #fff; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+    .login-title    { font-size: 1.25rem; font-weight: 700; color: var(--navy); margin-bottom: 4px; }
+    .login-subtitle { font-size: 0.78rem; color: #888; letter-spacing: 0.04em; }
+
+    .login-field { margin-bottom: 14px; }
+    .login-field label { display: block; font-size: 0.72rem; font-weight: 600; color: #555; letter-spacing: 0.05em; text-transform: uppercase; margin-bottom: 6px; }
+    .login-field input { width: 100%; padding: 10px 13px; border: 1.5px solid #dde0ec; border-radius: var(--radius-sm); font-family: inherit; font-size: 0.9rem; color: #1a1a2e; outline: none; transition: border-color 0.2s; }
+    .login-field input:focus { border-color: var(--navy); }
+
+    .login-btn { width: 100%; padding: 11px; background: var(--navy); color: #fff; border: none; border-radius: var(--radius-sm); font-family: inherit; font-size: 0.9rem; font-weight: 600; cursor: pointer; margin-top: 8px; }
+    .login-btn:hover { background: var(--navy-mid); }
+    .login-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+    .login-error { margin-top: 12px; padding: 9px 12px; background: rgba(224,80,80,0.09); border: 1px solid rgba(224,80,80,0.25); border-radius: var(--radius-sm); font-size: 0.78rem; color: var(--urgent); display: none; }
+
+    .login-back { display: block; text-align: center; margin-top: 16px; font-size: 0.76rem; color: rgba(255,255,255,0.5); cursor: pointer; }
+    .login-back:hover { color: #fff; }
+
+    /* Editor inside overlay */
+    #admin-editor { display: none; min-height: 100vh; }
+
+    .admin-header {
+      background: var(--navy-dark); padding: 0 28px;
+      display: flex; align-items: center; gap: 16px;
+      height: 58px; position: sticky; top: 0; z-index: 100;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .admin-header-title { font-size: 0.88rem; font-weight: 700; color: #fff; }
+    .admin-header-sub   { font-size: 0.68rem; color: rgba(255,255,255,0.45); letter-spacing: 0.06em; text-transform: uppercase; }
+    .admin-header-right { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+
+    .save-btn   { padding: 8px 20px; background: var(--gold); color: #3a2800; border: none; border-radius: var(--radius-sm); font-family: inherit; font-size: 0.8rem; font-weight: 700; cursor: pointer; }
+    .save-btn:hover     { background: var(--gold-light); }
+    .save-btn:disabled  { opacity: 0.5; cursor: not-allowed; }
+
+    .back-btn   { padding: 8px 14px; background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.7); border: 1px solid rgba(255,255,255,0.12); border-radius: var(--radius-sm); font-family: inherit; font-size: 0.78rem; font-weight: 600; cursor: pointer; }
+    .back-btn:hover     { background: rgba(255,255,255,0.14); color: #fff; }
+
+    .logout-lnk { font-size: 0.72rem; color: rgba(255,255,255,0.4); cursor: pointer; padding: 4px 8px; }
+    .logout-lnk:hover { color: rgba(255,255,255,0.7); }
+
+    .save-status { font-size: 0.72rem; color: var(--green); font-weight: 600; opacity: 0; transition: opacity 0.4s; }
+    .save-status.show { opacity: 1; }
+
+    .admin-body { max-width: 960px; margin: 0 auto; padding: 28px 20px 60px; }
+
+    /* Section blocks */
+    .section-block { background: #fff; border-radius: var(--radius); box-shadow: 0 2px 8px rgba(0,0,0,0.10); margin-bottom: 20px; overflow: hidden; }
+
+    .section-block-header { display: flex; align-items: center; gap: 10px; padding: 14px 18px; background: #f8f9fc; border-bottom: 1px solid rgba(0,0,0,0.07); cursor: pointer; user-select: none; }
+    .section-block-header::before { content: ''; display: block; width: 3px; height: 18px; background: var(--navy); border-radius: 2px; flex-shrink: 0; }
+    .section-block-title  { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.10em; text-transform: uppercase; color: var(--navy); }
+    .section-block-count  { font-size: 0.65rem; font-weight: 600; color: #888; margin-left: 4px; }
+    .section-block-chevron{ margin-left: auto; font-size: 0.75rem; color: #aaa; transition: transform 0.25s; }
+    .section-block.collapsed .section-block-chevron { transform: rotate(-90deg); }
+    .section-block.collapsed .section-block-body    { display: none; }
+    .section-block-body   { padding: 16px 18px; }
+
+    /* Form fields */
+    .week-row input { width: 100%; padding: 9px 12px; border: 1.5px solid #dde0ec; border-radius: var(--radius-sm); font-family: inherit; font-size: 0.9rem; color: #1a1a2e; outline: none; }
+    .week-row input:focus { border-color: var(--navy); }
+
+    .item-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 12px; }
+    .item-row  { background: #f7f8fc; border: 1.5px solid #e8eaf2; border-radius: var(--radius-sm); padding: 12px 14px; }
+
+    .item-row-fields         { display: grid; gap: 8px; }
+    .item-row-fields.cols-2  { grid-template-columns: 1fr 1fr; }
+    .item-row-fields.cols-3  { grid-template-columns: 1fr 1fr 1fr; }
+    .item-row-fields.cols-4  { grid-template-columns: 1fr 1fr 1fr 1fr; }
+
+    .field-group { display: flex; flex-direction: column; gap: 4px; }
+    .field-group label { font-size: 0.64rem; font-weight: 600; color: #888; letter-spacing: 0.06em; text-transform: uppercase; }
+    .field-group input,
+    .field-group select,
+    .field-group textarea { padding: 7px 10px; border: 1.5px solid #dde0ec; border-radius: var(--radius-sm); font-family: inherit; font-size: 0.82rem; color: #1a1a2e; background: #fff; outline: none; transition: border-color 0.2s; }
+    .field-group input:focus,
+    .field-group select:focus,
+    .field-group textarea:focus { border-color: var(--navy); }
+    .field-group textarea { resize: vertical; min-height: 60px; }
+
+    .item-row-actions { display: flex; justify-content: flex-end; margin-top: 10px; padding-top: 10px; border-top: 1px solid #eaedf5; }
+
+    .btn-delete { padding: 5px 12px; background: rgba(224,80,80,0.08); color: var(--urgent); border: 1px solid rgba(224,80,80,0.2); border-radius: var(--radius-sm); font-family: inherit; font-size: 0.74rem; font-weight: 600; cursor: pointer; }
+    .btn-delete:hover { background: rgba(224,80,80,0.15); }
+
+    .btn-add { display: flex; align-items: center; justify-content: center; gap: 6px; padding: 8px 14px; background: rgba(27,58,140,0.07); color: var(--navy); border: 1.5px dashed rgba(27,58,140,0.25); border-radius: var(--radius-sm); font-family: inherit; font-size: 0.78rem; font-weight: 600; cursor: pointer; width: 100%; }
+    .btn-add:hover { background: rgba(27,58,140,0.12); }
+
+    .pinned-label { display: flex; align-items: center; gap: 8px; font-size: 0.78rem; color: #555; cursor: pointer; padding: 6px 0; }
+    .pinned-label input[type="checkbox"] { width: 15px; height: 15px; accent-color: var(--navy); cursor: pointer; }
+
+    .setup-banner { background: rgba(201,168,76,0.12); border: 1.5px solid rgba(201,168,76,0.35); border-radius: var(--radius); padding: 16px 20px; margin-bottom: 20px; }
+    .setup-banner h3 { font-size: 0.85rem; font-weight: 700; color: #7a5c00; margin-bottom: 6px; }
+    .setup-banner p, .setup-banner li { font-size: 0.78rem; color: #5a4400; line-height: 1.55; }
+    .setup-banner ol { padding-left: 18px; margin-top: 6px; }
+    .setup-banner code { background: rgba(0,0,0,0.07); padding: 1px 5px; border-radius: 3px; font-family: monospace; font-size: 0.82em; }
+    .setup-banner a { color: var(--navy); }
   </style>
 </head>
 <body>
+
+<!-- ══════════════════════════════════════════════
+     NOTICEBOARD (always visible behind overlay)
+══════════════════════════════════════════════ -->
 <div class="shell">
   <header class="header">
     <div class="logo-wrap">
-      <img class="logo-img" src="logo.png" alt="Newton Sixth Form" />
-      <div class="school-text">
+      <img class="logo-img" id="logo-img" src="logo.png" alt="Newton Sixth Form"
+           onload="this.style.display='block'; document.getElementById('school-text').style.display='none';"
+           onerror="this.style.display='none';" />
+      <div class="school-text" id="school-text">
         <div class="school-name">Newton Sixth Form</div>
         <div class="board-label">Staff Notice Board</div>
       </div>
@@ -612,6 +639,7 @@
     <div class="header-right">
       <div class="week-pill" id="week-badge">Week 1</div>
       <div class="live-indicator"><div class="live-dot"></div>Live</div>
+      <button id="admin-toggle" title="Staff Admin">⚙</button>
     </div>
   </header>
 
@@ -631,7 +659,6 @@
           </div>
         </div>
       </div>
-
       <div class="section-card" style="flex:1;min-height:0;">
         <div class="section-header">
           <span class="section-title">Important Dates</span>
@@ -672,364 +699,864 @@
   </div>
 </div>
 
-<!-- Firebase SDK -->
+<!-- ══════════════════════════════════════════════
+     ADMIN OVERLAY
+══════════════════════════════════════════════ -->
+<div id="admin-overlay">
+
+  <!-- Login panel -->
+  <div id="admin-login">
+    <div>
+      <div class="login-card">
+        <div class="login-logo">
+          <div class="login-logo-circle">
+            <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+          </div>
+          <div class="login-title">Newton Sixth Form</div>
+          <div class="login-subtitle">Staff Admin Portal</div>
+        </div>
+        <div class="login-field">
+          <label>Email</label>
+          <input type="email" id="login-email" placeholder="yourname@newton.ac.th" autocomplete="email" />
+        </div>
+        <div class="login-field">
+          <label>Password</label>
+          <input type="password" id="login-password" placeholder="••••••••" autocomplete="current-password" />
+        </div>
+        <button class="login-btn" id="login-btn">Sign In</button>
+        <div class="login-error" id="login-error"></div>
+      </div>
+      <span class="login-back" id="login-back-btn">← Back to noticeboard</span>
+    </div>
+  </div>
+
+  <!-- Editor panel -->
+  <div id="admin-editor">
+    <header class="admin-header">
+      <div>
+        <div class="admin-header-title">Newton Sixth Form — Admin</div>
+        <div class="admin-header-sub">Noticeboard Editor</div>
+      </div>
+      <div class="admin-header-right">
+        <span class="save-status" id="save-status">✓ Published</span>
+        <button class="save-btn" id="save-btn">Publish Changes</button>
+        <button class="back-btn" id="close-admin-btn">← Back to Board</button>
+        <span class="logout-lnk" id="logout-btn">Sign out</span>
+      </div>
+    </header>
+
+    <div class="admin-body">
+
+      <div class="setup-banner" id="setup-banner" style="display:none;">
+        <h3>⚠ Firebase Not Configured — Demo Mode</h3>
+        <p>Changes will not sync across devices until Firebase is connected. To set up:</p>
+        <ol>
+          <li>Create a free project at <a href="https://console.firebase.google.com" target="_blank">console.firebase.google.com</a>.</li>
+          <li>Enable <strong>Realtime Database</strong> (start in test mode).</li>
+          <li>Enable <strong>Authentication → Email/Password</strong> → add staff accounts.</li>
+          <li>Replace the <code>REPLACE_WITH_YOUR_*</code> values in the <code>FIREBASE_CONFIG</code> block in this file.</li>
+        </ol>
+      </div>
+
+      <!-- Week / Term -->
+      <div class="section-block" id="block-week">
+        <div class="section-block-header" id="hdr-week">
+          <span class="section-block-title">Week &amp; Term</span>
+          <span class="section-block-chevron">▼</span>
+        </div>
+        <div class="section-block-body">
+          <div class="week-row">
+            <input type="text" id="admin-week-label" placeholder="e.g. Week 1 — Term 2" />
+          </div>
+          <p style="font-size:0.72rem;color:#888;margin-top:8px;">Shown in the top-right pill on the noticeboard.</p>
+        </div>
+      </div>
+
+      <!-- Trial Students -->
+      <div class="section-block" id="block-students">
+        <div class="section-block-header" id="hdr-students">
+          <span class="section-block-title">Trial Students</span>
+          <span class="section-block-count" id="count-students"></span>
+          <span class="section-block-chevron">▼</span>
+        </div>
+        <div class="section-block-body">
+          <div class="item-list" id="list-students"></div>
+          <button class="btn-add" id="add-student-btn">+ Add Student</button>
+        </div>
+      </div>
+
+      <!-- Important Dates -->
+      <div class="section-block" id="block-dates">
+        <div class="section-block-header" id="hdr-dates">
+          <span class="section-block-title">Important Dates</span>
+          <span class="section-block-count" id="count-dates"></span>
+          <span class="section-block-chevron">▼</span>
+        </div>
+        <div class="section-block-body">
+          <div class="item-list" id="list-dates"></div>
+          <button class="btn-add" id="add-date-btn">+ Add Date</button>
+        </div>
+      </div>
+
+      <!-- Announcements -->
+      <div class="section-block" id="block-announcements">
+        <div class="section-block-header" id="hdr-announcements">
+          <span class="section-block-title">Announcements</span>
+          <span class="section-block-count" id="count-announcements"></span>
+          <span class="section-block-chevron">▼</span>
+        </div>
+        <div class="section-block-body">
+          <div class="item-list" id="list-announcements"></div>
+          <button class="btn-add" id="add-announcement-btn">+ Add Announcement</button>
+        </div>
+      </div>
+
+      <!-- Events -->
+      <div class="section-block" id="block-events">
+        <div class="section-block-header" id="hdr-events">
+          <span class="section-block-title">Upcoming Events</span>
+          <span class="section-block-count" id="count-events"></span>
+          <span class="section-block-chevron">▼</span>
+        </div>
+        <div class="section-block-body">
+          <div class="item-list" id="list-events"></div>
+          <button class="btn-add" id="add-event-btn">+ Add Event</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 
 <script>
-  /* ─── FIREBASE CONFIG ───────────────────────────────────────────
-     Replace these placeholder values with your Firebase project config.
-     Get them from: Firebase Console → Project Settings → Your apps → SDK setup
-  ─────────────────────────────────────────────────────────────── */
-  var FIREBASE_CONFIG = {
-    apiKey:            "REPLACE_WITH_YOUR_API_KEY",
-    authDomain:        "REPLACE_WITH_YOUR_AUTH_DOMAIN",
-    databaseURL:       "REPLACE_WITH_YOUR_DATABASE_URL",
-    projectId:         "REPLACE_WITH_YOUR_PROJECT_ID",
-    storageBucket:     "REPLACE_WITH_YOUR_STORAGE_BUCKET",
-    messagingSenderId: "REPLACE_WITH_YOUR_MESSAGING_SENDER_ID",
-    appId:             "REPLACE_WITH_YOUR_APP_ID"
-  };
+/* ══════════════════════════════════════════════════════════
+   FIREBASE CONFIG
+   Replace the REPLACE_WITH_YOUR_* values with your project's
+   Firebase config from console.firebase.google.com
+══════════════════════════════════════════════════════════ */
+var FIREBASE_CONFIG = {
+  apiKey:            "REPLACE_WITH_YOUR_API_KEY",
+  authDomain:        "REPLACE_WITH_YOUR_AUTH_DOMAIN",
+  databaseURL:       "REPLACE_WITH_YOUR_DATABASE_URL",
+  projectId:         "REPLACE_WITH_YOUR_PROJECT_ID",
+  storageBucket:     "REPLACE_WITH_YOUR_STORAGE_BUCKET",
+  messagingSenderId: "REPLACE_WITH_YOUR_MESSAGING_SENDER_ID",
+  appId:             "REPLACE_WITH_YOUR_APP_ID"
+};
 
-  /* ─── FALLBACK DATA (shown before Firebase loads / if not configured) ── */
-  var DEFAULT_DATA = {
-    weekLabel: "Week 1 — Term 2",
-    trialStudents: [],
-    importantDates: [],
-    announcements: [],
-    events: []
-  };
+/* ══════════════════════════════════════════════════════════
+   STATE — must be declared before anything calls renderAll
+══════════════════════════════════════════════════════════ */
+var currentData = {
+  weekLabel:      'Week 1 — Term 2',
+  trialStudents:  [],
+  importantDates: [],
+  announcements:  [],
+  events:         []
+};
 
-  /* ─── SVG ICONS ────────────────────────────────────────────── */
-  var ICONS = {
-    bell:    '<svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>',
-    lock:    '<svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>',
-    users:   '<svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>',
-    printer: '<svg viewBox="0 0 24 24"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>',
-    car:     '<svg viewBox="0 0 24 24"><path d="M5 17H3a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v9a2 2 0 0 1-2 2h-2"/><circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/></svg>',
-  };
+var db = null;
+var auth = null;
+var isConfigured = FIREBASE_CONFIG.apiKey !== 'REPLACE_WITH_YOUR_API_KEY';
+var eventsCur = 0;
+var eventsTimer = null;
 
-  /* ─── CLOCK ─────────────────────────────────────────────────── */
-  function updateClock() {
-    var now = new Date();
-    var h = String(now.getHours()).padStart(2,'0');
-    var m = String(now.getMinutes()).padStart(2,'0');
-    var days   = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
-    var months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-    document.getElementById('live-time').textContent = h + ':' + m;
-    document.getElementById('live-date').textContent = days[now.getDay()] + ' · ' + now.getDate() + ' ' + months[now.getMonth()] + ' ' + now.getFullYear();
-  }
-  updateClock();
-  setInterval(updateClock, 15000);
+/* ══════════════════════════════════════════════════════════
+   FIREBASE INIT
+══════════════════════════════════════════════════════════ */
+if (isConfigured) {
+  firebase.initializeApp(FIREBASE_CONFIG);
+  db   = firebase.database();
+  auth = firebase.auth();
 
-  /* ─── HELPERS ───────────────────────────────────────────────── */
-  function initials(n) {
-    return n.split(' ').map(function(p){ return p[0]; }).join('').substring(0,2).toUpperCase();
-  }
-
-  /* ─── RENDER FUNCTIONS ──────────────────────────────────────── */
-  function renderTrialStudents(students) {
-    var trialEl = document.getElementById('trial-list');
-    var inner   = document.getElementById('trial-scroll-inner');
-    document.getElementById('trial-count').textContent = students.length + ' visiting';
-
-    // Clear any existing clone from previous render
-    while (inner.children.length > 1) inner.removeChild(inner.lastChild);
-    inner.style.animation = 'none';
-
-    if (students.length === 0) {
-      trialEl.innerHTML = '<div class="empty-state" style="padding:12px;">No trial students this week.</div>';
-      return;
+  // Real-time listener: noticeboard updates whenever data changes in Firebase
+  db.ref('noticeboard').on('value', function(snap) {
+    var d = snap.val();
+    if (d) {
+      currentData.weekLabel      = d.weekLabel      || currentData.weekLabel;
+      currentData.trialStudents  = d.trialStudents  || [];
+      currentData.importantDates = d.importantDates || [];
+      currentData.announcements  = d.announcements  || [];
+      currentData.events         = d.events         || [];
     }
+    renderAll();
+  });
 
-    trialEl.innerHTML = students.map(function(s) {
-      var tagLabel = s.track ? s.yearGroup + ' · ' + s.track + ' · ' + s.room : s.yearGroup + ' · ' + s.room;
-      return '<div class="trial-card">' +
-        '<div class="trial-avatar">' + initials(s.name) + '</div>' +
-        '<div style="flex:1;min-width:0"><div class="trial-name">' + s.name + '</div>' +
-        '<div class="trial-day">' + s.visitDay + '</div></div>' +
-        '<span class="trial-tag">' + tagLabel + '</span>' +
-      '</div>';
-    }).join('');
-
-    requestAnimationFrame(function() { requestAnimationFrame(function() {
-      var outer = document.getElementById('trial-scroll-outer');
-      var outerH = outer.clientHeight;
-      var listH  = trialEl.scrollHeight + 9;
-      var gap    = 6;
-
-      if (listH > outerH) {
-        var clone = trialEl.cloneNode(true);
-        clone.id = '';
-        clone.style.marginTop = gap + 'px';
-        inner.appendChild(clone);
-
-        var totalH   = listH + gap;
-        var pxPerSec = 10;
-        var dur      = totalH / pxPerSec;
-
-        inner.style.setProperty('--scroll-dist', '-' + totalH + 'px');
-        inner.style.animation = 'autoScroll ' + dur + 's linear infinite';
-
-        inner.addEventListener('mouseenter', function() { inner.style.animationPlayState = 'paused'; });
-        inner.addEventListener('mouseleave', function() { inner.style.animationPlayState = 'running'; });
-      }
-    }); });
-  }
-
-  function makeDateRow(d) {
-    var numClass = d.status==='today' ? 'gold-date' : d.status==='urgent' ? 'urgent-date' : '';
-    var badge = d.badge ? '<span class="date-badge ' + (d.status==='today'?'today':d.status==='urgent'?'urgent':'info') + '">' + d.badge + '</span>' : '';
-    return '<div class="date-row ' + d.status + '">' +
-      '<div class="date-block ' + numClass + '"><div class="d-name">' + d.dayName + '</div><div class="d-num">' + d.dayNum + '</div><div class="d-mon">' + d.month + '</div></div>' +
-      '<div class="date-detail"><div class="date-label">' + d.label + '</div>' + (d.note?'<div class="date-note">'+d.note+'</div>':'') + '</div>' +
-      badge + '</div>';
-  }
-
-  function renderImportantDates(dates) {
-    var wrap = document.getElementById('dates-carousel');
-    wrap.innerHTML = '';
-    document.getElementById('dates-count').textContent = dates.length + ' dates';
-    if (dates.length === 0) {
-      wrap.innerHTML = '<div class="carousel-slide active" style="padding:8px 10px;"><div class="empty-state">No dates added.</div></div>';
-      return;
+  auth.onAuthStateChanged(function(user) {
+    if (user && document.getElementById('admin-login').style.display !== 'none') {
+      showEditor();
     }
+  });
+} else {
+  renderAll();
+}
 
-    var testSlide = document.createElement('div');
-    testSlide.className = 'carousel-slide active';
-    testSlide.style.padding = '8px 10px';
-    testSlide.innerHTML = '<div class="dates-list">' + dates.map(makeDateRow).join('') + '</div>';
-    wrap.appendChild(testSlide);
+/* ══════════════════════════════════════════════════════════
+   CLOCK
+══════════════════════════════════════════════════════════ */
+function updateClock() {
+  var now = new Date();
+  var h = String(now.getHours()).padStart(2,'0');
+  var m = String(now.getMinutes()).padStart(2,'0');
+  var days   = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  var months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  document.getElementById('live-time').textContent = h + ':' + m;
+  document.getElementById('live-date').textContent = days[now.getDay()] + ' · ' + now.getDate() + ' ' + months[now.getMonth()] + ' ' + now.getFullYear();
+}
+updateClock();
+setInterval(updateClock, 15000);
 
-    requestAnimationFrame(function() { requestAnimationFrame(function() {
-      var fits = testSlide.scrollHeight <= wrap.clientHeight + 2;
-      if (fits) return;
-
-      wrap.innerHTML = '';
-      var rows = dates;
-      var pages = [];
-      var i = 0;
-      while (i < rows.length) {
-        var probe = document.createElement('div');
-        probe.className = 'carousel-slide active';
-        probe.style.padding = '8px 10px';
-        probe.style.visibility = 'hidden';
-        wrap.appendChild(probe);
-        var j = i;
-        var list = '';
-        while (j < rows.length) {
-          var trial = list + makeDateRow(rows[j]);
-          probe.innerHTML = '<div class="dates-list">' + trial + '</div>';
-          if (probe.scrollHeight > wrap.clientHeight + 2 && j > i) break;
-          list = trial;
-          j++;
-        }
-        wrap.removeChild(probe);
-        pages.push(rows.slice(i, j));
-        i = j;
-      }
-
-      pages.forEach(function(page, pi) {
-        var slide = document.createElement('div');
-        slide.className = 'carousel-slide' + (pi===0?' active':'');
-        slide.style.padding = '8px 10px';
-        slide.innerHTML = '<div class="dates-list">' + page.map(makeDateRow).join('') + '</div>';
-        wrap.appendChild(slide);
-      });
-
-      if (pages.length > 1) {
-        var slides = wrap.querySelectorAll('.carousel-slide');
-        var cur = 0;
-        setTimeout(function tick() {
-          slides[cur].classList.remove('active');
-          cur = (cur + 1) % slides.length;
-          slides[cur].classList.add('active');
-          setTimeout(tick, 7000);
-        }, 19000);
-      }
-    }); });
-  }
-
-  function makeAnnItem(a) {
-    var iconHtml = ICONS[a.iconType] || ICONS.bell;
-    var colorClass = a.iconColor==='red' ? 'red-icon' : a.iconColor==='green' ? 'green-icon' : a.iconColor==='soft' ? 'soft-icon' : '';
-    return '<div class="ann-item' + (a.pinned?' pinned':'') + '">' +
-      '<div class="ann-icon ' + colorClass + '">' + iconHtml + '</div>' +
-      '<div class="ann-text"><div class="ann-title">' + a.title + '</div>' +
-      '<div class="ann-body">' + a.body + '</div>' +
-      '<div class="ann-footer"><span class="ann-tag ' + a.tag.style + '">' + a.tag.label + '</span>' +
-      '<span class="ann-time">' + a.time + '</span></div></div></div>';
-  }
-
-  function renderAnnouncements(announcements) {
-    var wrap = document.getElementById('ann-carousel');
-    wrap.innerHTML = '';
-    document.getElementById('ann-count').textContent = announcements.length + ' notices';
-    if (announcements.length === 0) {
-      wrap.innerHTML = '<div class="carousel-slide active" style="padding:10px 12px;"><div class="empty-state">No announcements.</div></div>';
-      return;
-    }
-
-    var testSlide = document.createElement('div');
-    testSlide.className = 'carousel-slide active';
-    testSlide.style.padding = '10px 12px';
-    testSlide.innerHTML = '<div class="ann-list">' + announcements.map(makeAnnItem).join('') + '</div>';
-    wrap.appendChild(testSlide);
-
-    requestAnimationFrame(function() { requestAnimationFrame(function() {
-      var fits = testSlide.scrollHeight <= wrap.clientHeight + 2;
-      if (fits) return;
-
-      wrap.innerHTML = '';
-      var items = announcements;
-      var pages = [];
-      var i = 0;
-      while (i < items.length) {
-        var probe = document.createElement('div');
-        probe.className = 'carousel-slide active';
-        probe.style.padding = '10px 12px';
-        probe.style.visibility = 'hidden';
-        wrap.appendChild(probe);
-        var j = i;
-        var list = '';
-        while (j < items.length) {
-          var trial = list + makeAnnItem(items[j]);
-          probe.innerHTML = '<div class="ann-list">' + trial + '</div>';
-          if (probe.scrollHeight > wrap.clientHeight + 2 && j > i) break;
-          list = trial;
-          j++;
-        }
-        wrap.removeChild(probe);
-        pages.push(items.slice(i, j));
-        i = j;
-      }
-
-      pages.forEach(function(page, pi) {
-        var slide = document.createElement('div');
-        slide.className = 'carousel-slide' + (pi===0?' active':'');
-        slide.style.padding = '10px 12px';
-        slide.innerHTML = '<div class="ann-list">' + page.map(makeAnnItem).join('') + '</div>';
-        wrap.appendChild(slide);
-      });
-
-      if (pages.length > 1) {
-        var slides = wrap.querySelectorAll('.carousel-slide');
-        var cur = 0;
-        setTimeout(function tick() {
-          slides[cur].classList.remove('active');
-          cur = (cur + 1) % slides.length;
-          slides[cur].classList.add('active');
-          setTimeout(tick, 7000);
-        }, 33000);
-      }
-    }); });
-  }
-
-  var eventsCur = 0;
-  var eventsTimer = null;
-
-  function renderEvents(events) {
-    var carouselEl = document.getElementById('advert-carousel');
-    var dotsEl     = document.getElementById('carousel-dots');
-    var progEl     = document.getElementById('advert-progress');
-    var ROTATE_MS  = 7000;
-
-    // Clear existing slides (keep progEl)
-    while (carouselEl.firstChild) carouselEl.removeChild(carouselEl.firstChild);
-    carouselEl.appendChild(progEl);
-    dotsEl.innerHTML = '';
-    if (eventsTimer) clearInterval(eventsTimer);
-    eventsCur = 0;
-
-    document.getElementById('events-count').textContent = events.length + ' events';
-
-    if (events.length === 0) {
-      carouselEl.innerHTML = '<div class="empty-state" style="position:relative;z-index:2;padding:40px;">No upcoming events.</div>';
-      return;
-    }
-
-    events.forEach(function(ev, i) {
-      var slide = document.createElement('div');
-      slide.className = 'advert-slide' + (i===0?' active':'');
-      slide.innerHTML =
-        '<div class="advert-bg-grad"></div>' +
-        '<div class="advert-content">' +
-          '<div class="advert-eyebrow">' + ev.eyebrow + '</div>' +
-          '<div class="advert-title">' + ev.title + '</div>' +
-          '<div class="advert-desc">' + ev.desc + '</div>' +
-          '<div class="advert-meta">' +
-            '<div class="advert-meta-item"><div class="advert-meta-label">When</div><div class="advert-meta-value">' + ev.datetime + '</div></div>' +
-            '<div class="advert-meta-item"><div class="advert-meta-label">Where</div><div class="advert-meta-value">' + ev.location + '</div></div>' +
-          '</div>' +
-        '</div>';
-      carouselEl.insertBefore(slide, progEl);
-    });
-
-    events.forEach(function(_, i) {
-      var dot = document.createElement('div');
-      dot.className = 'dot' + (i===0?' active':'');
-      dot.addEventListener('click', function() { goTo(i); });
-      dotsEl.appendChild(dot);
-    });
-
-    var slides = carouselEl.querySelectorAll('.advert-slide');
-    var dots   = dotsEl.querySelectorAll('.dot');
-
-    function startProg() {
-      progEl.style.transition = 'none';
-      progEl.style.width = '0%';
-      void progEl.offsetWidth;
-      progEl.style.transition = 'width ' + ROTATE_MS + 'ms linear';
-      progEl.style.width = '100%';
-    }
-
-    function goTo(idx) {
-      slides[eventsCur].classList.remove('active');
-      dots[eventsCur].classList.remove('active');
-      eventsCur = (idx + events.length) % events.length;
-      slides[eventsCur].classList.add('active');
-      dots[eventsCur].classList.add('active');
-      startProg();
-    }
-
-    startProg();
-    eventsTimer = setInterval(function() { goTo(eventsCur + 1); }, ROTATE_MS);
-  }
-
-  /* ─── RENDER ALL ─────────────────────────────────────────────── */
-  function renderAll(data) {
-    document.getElementById('week-badge').textContent = data.weekLabel || 'Week 1';
-    renderTrialStudents(data.trialStudents || []);
-    renderImportantDates(data.importantDates || []);
-    renderAnnouncements(data.announcements || []);
-    renderEvents(data.events || []);
-  }
-
-  /* ─── FIREBASE INIT ──────────────────────────────────────────── */
-  var isFirebaseConfigured = FIREBASE_CONFIG.apiKey !== 'REPLACE_WITH_YOUR_API_KEY';
-
-  if (isFirebaseConfigured) {
-    try {
-      firebase.initializeApp(FIREBASE_CONFIG);
-      var db = firebase.database();
-      db.ref('noticeboard').on('value', function(snapshot) {
-        var data = snapshot.val();
-        if (data) {
-          renderAll(data);
-        } else {
-          renderAll(DEFAULT_DATA);
-        }
-      }, function(err) {
-        console.error('Firebase read error:', err);
-        renderAll(DEFAULT_DATA);
-      });
-    } catch(e) {
-      console.error('Firebase init error:', e);
-      renderAll(DEFAULT_DATA);
-    }
+/* ══════════════════════════════════════════════════════════
+   ADMIN OVERLAY — open / close
+══════════════════════════════════════════════════════════ */
+document.getElementById('admin-toggle').addEventListener('click', function() {
+  document.getElementById('admin-overlay').style.display = 'block';
+  document.body.style.overflow = 'hidden'; // prevent body scroll
+  if (isConfigured) {
+    // If already logged in go straight to editor
+    if (auth.currentUser) { showEditor(); } else { showLoginPanel(); }
   } else {
-    renderAll(DEFAULT_DATA);
+    // Demo mode: straight to editor
+    showEditor();
+    document.getElementById('setup-banner').style.display = 'block';
   }
+});
+
+function closeOverlay() {
+  document.getElementById('admin-overlay').style.display = 'none';
+  document.body.style.overflow = '';
+}
+
+document.getElementById('close-admin-btn').addEventListener('click', closeOverlay);
+document.getElementById('login-back-btn').addEventListener('click', closeOverlay);
+
+function showLoginPanel() {
+  document.getElementById('admin-login').style.display = 'flex';
+  document.getElementById('admin-editor').style.display = 'none';
+}
+
+function showEditor() {
+  document.getElementById('admin-login').style.display  = 'none';
+  document.getElementById('admin-editor').style.display = 'block';
+  populateAdminUI();
+}
+
+/* ══════════════════════════════════════════════════════════
+   AUTH
+══════════════════════════════════════════════════════════ */
+document.getElementById('login-btn').addEventListener('click', doLogin);
+document.getElementById('login-password').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') doLogin();
+});
+document.getElementById('logout-btn').addEventListener('click', function() {
+  if (auth) { auth.signOut().then(showLoginPanel); } else { showLoginPanel(); }
+});
+
+function doLogin() {
+  var email    = document.getElementById('login-email').value.trim();
+  var password = document.getElementById('login-password').value;
+  var errEl    = document.getElementById('login-error');
+  var btn      = document.getElementById('login-btn');
+  errEl.style.display = 'none';
+  btn.disabled = true;
+  btn.textContent = 'Signing in…';
+
+  if (!isConfigured) {
+    showEditor();
+    btn.disabled = false;
+    btn.textContent = 'Sign In';
+    return;
+  }
+
+  auth.signInWithEmailAndPassword(email, password)
+    .then(function() { showEditor(); btn.disabled = false; btn.textContent = 'Sign In'; })
+    .catch(function(err) {
+      errEl.textContent = (err.code === 'auth/wrong-password' || err.code === 'auth/user-not-found')
+        ? 'Incorrect email or password.' : err.message;
+      errEl.style.display = 'block';
+      btn.disabled = false;
+      btn.textContent = 'Sign In';
+    });
+}
+
+/* ══════════════════════════════════════════════════════════
+   SECTION BLOCK COLLAPSE
+══════════════════════════════════════════════════════════ */
+['week','students','dates','announcements','events'].forEach(function(name) {
+  document.getElementById('hdr-' + name).addEventListener('click', function() {
+    document.getElementById('block-' + name).classList.toggle('collapsed');
+  });
+});
+
+/* ══════════════════════════════════════════════════════════
+   SAVE
+══════════════════════════════════════════════════════════ */
+document.getElementById('save-btn').addEventListener('click', saveAll);
+
+function saveAll() {
+  collectAll();
+  var btn = document.getElementById('save-btn');
+  btn.disabled = true;
+  btn.textContent = 'Saving…';
+
+  function done() {
+    btn.disabled = false;
+    btn.textContent = 'Publish Changes';
+    var s = document.getElementById('save-status');
+    s.classList.add('show');
+    setTimeout(function() { s.classList.remove('show'); }, 2500);
+    renderAll(); // update the board behind the overlay immediately
+  }
+
+  if (db) {
+    db.ref('noticeboard').set(currentData).then(done).catch(function(err) {
+      btn.disabled = false;
+      btn.textContent = 'Publish Changes';
+      alert('Save failed: ' + err.message);
+    });
+  } else {
+    setTimeout(done, 300);
+  }
+}
+
+/* ══════════════════════════════════════════════════════════
+   UTILS
+══════════════════════════════════════════════════════════ */
+function esc(v) {
+  return String(v == null ? '' : v)
+    .replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function sel(field, value, options) {
+  return '<select data-field="' + field + '">' +
+    options.map(function(o) {
+      var val   = (typeof o === 'object') ? o.value : o;
+      var label = (typeof o === 'object') ? o.label : o;
+      var isSel = String(value) === String(val) ? ' selected' : '';
+      return '<option value="' + esc(val) + '"' + isSel + '>' + esc(label) + '</option>';
+    }).join('') + '</select>';
+}
+
+function inp(field, value, placeholder) {
+  return '<input type="text" data-field="' + field + '" value="' + esc(value) + '" placeholder="' + esc(placeholder||'') + '" />';
+}
+
+function txt(field, value, placeholder) {
+  return '<textarea data-field="' + field + '" placeholder="' + esc(placeholder||'') + '">' + esc(value) + '</textarea>';
+}
+
+function fld(label, html) {
+  return '<div class="field-group"><label>' + label + '</label>' + html + '</div>';
+}
+
+function updateCount(id, arr) {
+  document.getElementById(id).textContent = '(' + arr.length + ')';
+}
+
+function initials(n) {
+  return String(n).split(' ').map(function(p){ return p[0]||''; }).join('').substring(0,2).toUpperCase();
+}
+
+/* ══════════════════════════════════════════════════════════
+   ADMIN UI — populate + collect
+══════════════════════════════════════════════════════════ */
+function populateAdminUI() {
+  document.getElementById('admin-week-label').value = currentData.weekLabel;
+  renderAdminStudents();
+  renderAdminDates();
+  renderAdminAnnouncements();
+  renderAdminEvents();
+}
+
+function collectAll() {
+  currentData.weekLabel      = document.getElementById('admin-week-label').value.trim();
+  currentData.trialStudents  = collectStudents();
+  currentData.importantDates = collectDates();
+  currentData.announcements  = collectAnnouncements();
+  currentData.events         = collectEvents();
+}
+
+/* ── Trial Students (admin) ─────────────────────────────── */
+var YEAR_GROUPS = ['Year 8','Year 9','Year 12','Year 13'];
+var TRACKS      = [{value:'',label:'— None —'},'HUM','ENG','MED'];
+var ROOMS       = ['A','B','C','D'];
+
+document.getElementById('add-student-btn').addEventListener('click', function() {
+  collectAll();
+  currentData.trialStudents.push({ name:'', yearGroup:'Year 12', track:'', room:'A', visitDay:'' });
+  renderAdminStudents();
+});
+
+document.getElementById('list-students').addEventListener('click', function(e) {
+  var btn = e.target.closest('.btn-delete');
+  if (!btn) return;
+  collectAll();
+  currentData.trialStudents.splice(parseInt(btn.dataset.index), 1);
+  renderAdminStudents();
+});
+
+function renderAdminStudents() {
+  document.getElementById('list-students').innerHTML = currentData.trialStudents.map(function(s, i) {
+    return '<div class="item-row">' +
+      '<div class="item-row-fields cols-2">' +
+        fld('Full Name',            inp('name',      s.name,      'e.g. Somchai Jaidee (Name)')) +
+        fld('Visit Days',           inp('visitDay',  s.visitDay,  'e.g. Mon – Fri')) +
+        fld('Year Group',           sel('yearGroup', s.yearGroup, YEAR_GROUPS)) +
+        fld('Track (Y12/13 only)',  sel('track',     s.track,     TRACKS)) +
+        fld('Room',                 sel('room',      s.room,      ROOMS)) +
+      '</div>' +
+      '<div class="item-row-actions"><button class="btn-delete" data-index="' + i + '">Remove</button></div>' +
+    '</div>';
+  }).join('');
+  updateCount('count-students', currentData.trialStudents);
+}
+
+function collectStudents() {
+  return Array.from(document.querySelectorAll('#list-students .item-row')).map(function(row) {
+    return {
+      name:      row.querySelector('[data-field="name"]').value.trim(),
+      visitDay:  row.querySelector('[data-field="visitDay"]').value.trim(),
+      yearGroup: row.querySelector('[data-field="yearGroup"]').value,
+      track:     row.querySelector('[data-field="track"]').value,
+      room:      row.querySelector('[data-field="room"]').value
+    };
+  });
+}
+
+/* ── Important Dates (admin) ────────────────────────────── */
+var DATE_STATUSES = ['today','urgent','upcoming','normal'];
+
+document.getElementById('add-date-btn').addEventListener('click', function() {
+  collectAll();
+  currentData.importantDates.push({ dayName:'', dayNum:'', month:'', label:'', note:'', status:'normal', badge:'' });
+  renderAdminDates();
+});
+
+document.getElementById('list-dates').addEventListener('click', function(e) {
+  var btn = e.target.closest('.btn-delete');
+  if (!btn) return;
+  collectAll();
+  currentData.importantDates.splice(parseInt(btn.dataset.index), 1);
+  renderAdminDates();
+});
+
+function renderAdminDates() {
+  document.getElementById('list-dates').innerHTML = currentData.importantDates.map(function(d, i) {
+    return '<div class="item-row">' +
+      '<div class="item-row-fields cols-4">' +
+        fld('Day Name',   inp('dayName', d.dayName, 'Mon')) +
+        fld('Day Number', inp('dayNum',  d.dayNum,  '24'))  +
+        fld('Month',      inp('month',   d.month,   'Jun')) +
+        fld('Status',     sel('status',  d.status,  DATE_STATUSES)) +
+      '</div>' +
+      '<div class="item-row-fields" style="margin-top:8px;">' +
+        fld('Event Label', inp('label', d.label, 'e.g. Staff Briefing — Room 4')) +
+      '</div>' +
+      '<div class="item-row-fields cols-2" style="margin-top:8px;">' +
+        fld('Note (optional)',  inp('note',  d.note,       'e.g. 8:00 AM sharp')) +
+        fld('Badge (optional)', inp('badge', d.badge || '', 'e.g. Today / Urgent')) +
+      '</div>' +
+      '<div class="item-row-actions"><button class="btn-delete" data-index="' + i + '">Remove</button></div>' +
+    '</div>';
+  }).join('');
+  updateCount('count-dates', currentData.importantDates);
+}
+
+function collectDates() {
+  return Array.from(document.querySelectorAll('#list-dates .item-row')).map(function(row) {
+    var badge = row.querySelector('[data-field="badge"]').value.trim();
+    return {
+      dayName: row.querySelector('[data-field="dayName"]').value.trim(),
+      dayNum:  row.querySelector('[data-field="dayNum"]').value.trim(),
+      month:   row.querySelector('[data-field="month"]').value.trim(),
+      label:   row.querySelector('[data-field="label"]').value.trim(),
+      note:    row.querySelector('[data-field="note"]').value.trim(),
+      status:  row.querySelector('[data-field="status"]').value,
+      badge:   badge || null
+    };
+  });
+}
+
+/* ── Announcements (admin) ─────────────────────────────── */
+var ICON_TYPES  = ['bell','lock','users','printer','car'];
+var ICON_COLORS = ['gold','red','green','soft'];
+var TAG_STYLES  = ['admin','staff','urgent','visitor'];
+
+document.getElementById('add-announcement-btn').addEventListener('click', function() {
+  collectAll();
+  currentData.announcements.push({ iconType:'bell', iconColor:'gold', pinned:false, title:'', body:'', tag:{ label:'Admin', style:'admin' }, time:'Posted today' });
+  renderAdminAnnouncements();
+});
+
+document.getElementById('list-announcements').addEventListener('click', function(e) {
+  var btn = e.target.closest('.btn-delete');
+  if (!btn) return;
+  collectAll();
+  currentData.announcements.splice(parseInt(btn.dataset.index), 1);
+  renderAdminAnnouncements();
+});
+
+function renderAdminAnnouncements() {
+  document.getElementById('list-announcements').innerHTML = currentData.announcements.map(function(a, i) {
+    var tagLabel = (a.tag && a.tag.label) || '';
+    var tagStyle = (a.tag && a.tag.style) || 'admin';
+    var pinned   = a.pinned ? ' checked' : '';
+    return '<div class="item-row">' +
+      '<div class="item-row-fields cols-3">' +
+        fld('Icon',        sel('iconType',  a.iconType,  ICON_TYPES))  +
+        fld('Icon Colour', sel('iconColor', a.iconColor, ICON_COLORS)) +
+        fld('Tag Style',   sel('tagStyle',  tagStyle,    TAG_STYLES))  +
+      '</div>' +
+      '<div class="item-row-fields cols-2" style="margin-top:8px;">' +
+        fld('Title',     inp('title',    a.title,    '')) +
+        fld('Tag Label', inp('tagLabel', tagLabel,   'e.g. Admin')) +
+      '</div>' +
+      '<div class="item-row-fields" style="margin-top:8px;">' +
+        fld('Body Text', txt('body', a.body, '')) +
+      '</div>' +
+      '<div class="item-row-fields cols-2" style="margin-top:8px;">' +
+        fld('Time Label', inp('time', a.time, 'e.g. Posted today')) +
+        '<div class="field-group" style="justify-content:flex-end;padding-top:22px;">' +
+          '<label class="pinned-label"><input type="checkbox" data-field="pinned"' + pinned + ' /> Pin (gold border)</label>' +
+        '</div>' +
+      '</div>' +
+      '<div class="item-row-actions"><button class="btn-delete" data-index="' + i + '">Remove</button></div>' +
+    '</div>';
+  }).join('');
+  updateCount('count-announcements', currentData.announcements);
+}
+
+function collectAnnouncements() {
+  return Array.from(document.querySelectorAll('#list-announcements .item-row')).map(function(row) {
+    return {
+      iconType:  row.querySelector('[data-field="iconType"]').value,
+      iconColor: row.querySelector('[data-field="iconColor"]').value,
+      pinned:    row.querySelector('[data-field="pinned"]').checked,
+      title:     row.querySelector('[data-field="title"]').value.trim(),
+      body:      row.querySelector('[data-field="body"]').value.trim(),
+      tag: {
+        label: row.querySelector('[data-field="tagLabel"]').value.trim(),
+        style: row.querySelector('[data-field="tagStyle"]').value
+      },
+      time: row.querySelector('[data-field="time"]').value.trim()
+    };
+  });
+}
+
+/* ── Events (admin) ────────────────────────────────────── */
+document.getElementById('add-event-btn').addEventListener('click', function() {
+  collectAll();
+  currentData.events.push({ eyebrow:'', title:'', desc:'', datetime:'', location:'' });
+  renderAdminEvents();
+});
+
+document.getElementById('list-events').addEventListener('click', function(e) {
+  var btn = e.target.closest('.btn-delete');
+  if (!btn) return;
+  collectAll();
+  currentData.events.splice(parseInt(btn.dataset.index), 1);
+  renderAdminEvents();
+});
+
+function renderAdminEvents() {
+  document.getElementById('list-events').innerHTML = currentData.events.map(function(ev, i) {
+    return '<div class="item-row">' +
+      '<div class="item-row-fields cols-2">' +
+        fld('Eyebrow Label', inp('eyebrow',  ev.eyebrow,  'e.g. This Weekend')) +
+        fld('Event Title',   inp('title',    ev.title,    ''))                  +
+        fld('Date &amp; Time', inp('datetime', ev.datetime, 'e.g. Sat 28 June · 9:00 AM')) +
+        fld('Location',      inp('location', ev.location, 'e.g. Room 3, Floor 9')) +
+      '</div>' +
+      '<div class="item-row-fields" style="margin-top:8px;">' +
+        fld('Description', txt('desc', ev.desc, '')) +
+      '</div>' +
+      '<div class="item-row-actions"><button class="btn-delete" data-index="' + i + '">Remove</button></div>' +
+    '</div>';
+  }).join('');
+  updateCount('count-events', currentData.events);
+}
+
+function collectEvents() {
+  return Array.from(document.querySelectorAll('#list-events .item-row')).map(function(row) {
+    return {
+      eyebrow:  row.querySelector('[data-field="eyebrow"]').value.trim(),
+      title:    row.querySelector('[data-field="title"]').value.trim(),
+      desc:     row.querySelector('[data-field="desc"]').value.trim(),
+      datetime: row.querySelector('[data-field="datetime"]').value.trim(),
+      location: row.querySelector('[data-field="location"]').value.trim()
+    };
+  });
+}
+
+/* ══════════════════════════════════════════════════════════
+   NOTICEBOARD RENDERING
+══════════════════════════════════════════════════════════ */
+var ICONS = {
+  bell:    '<svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>',
+  lock:    '<svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>',
+  users:   '<svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>',
+  printer: '<svg viewBox="0 0 24 24"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>',
+  car:     '<svg viewBox="0 0 24 24"><path d="M5 17H3a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v9a2 2 0 0 1-2 2h-2"/><circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/></svg>'
+};
+
+function renderAll() {
+  document.getElementById('week-badge').textContent = currentData.weekLabel || 'Week 1';
+  renderBoardStudents(currentData.trialStudents  || []);
+  renderBoardDates   (currentData.importantDates || []);
+  renderBoardAnns    (currentData.announcements  || []);
+  renderBoardEvents  (currentData.events         || []);
+}
+
+/* Trial Students — board */
+function renderBoardStudents(students) {
+  var inner  = document.getElementById('trial-scroll-inner');
+  var listEl = document.getElementById('trial-list');
+  document.getElementById('trial-count').textContent = students.length + ' visiting';
+
+  // Clear old clones
+  while (inner.children.length > 1) inner.removeChild(inner.lastChild);
+  inner.style.animation = 'none';
+
+  if (!students.length) {
+    listEl.innerHTML = '<div class="empty-state" style="padding:12px;">No trial students this week.</div>';
+    return;
+  }
+
+  listEl.innerHTML = students.map(function(s) {
+    var tag = s.track ? s.yearGroup + ' · ' + s.track + ' · ' + s.room : s.yearGroup + ' · ' + s.room;
+    return '<div class="trial-card">' +
+      '<div class="trial-avatar">' + initials(s.name) + '</div>' +
+      '<div style="flex:1;min-width:0"><div class="trial-name">' + esc(s.name) + '</div>' +
+      '<div class="trial-day">' + esc(s.visitDay) + '</div></div>' +
+      '<span class="trial-tag">' + esc(tag) + '</span>' +
+    '</div>';
+  }).join('');
+
+  requestAnimationFrame(function() { requestAnimationFrame(function() {
+    var outer  = document.getElementById('trial-scroll-outer');
+    var outerH = outer.clientHeight;
+    var listH  = listEl.scrollHeight + 9;
+    var gap    = 6;
+    if (listH > outerH) {
+      var clone = listEl.cloneNode(true);
+      clone.id  = '';
+      clone.style.marginTop = gap + 'px';
+      inner.appendChild(clone);
+      var totalH = listH + gap;
+      var dur    = totalH / 10;
+      inner.style.setProperty('--scroll-dist', '-' + totalH + 'px');
+      inner.style.animation = 'autoScroll ' + dur + 's linear infinite';
+      inner.addEventListener('mouseenter', function() { inner.style.animationPlayState = 'paused'; });
+      inner.addEventListener('mouseleave', function() { inner.style.animationPlayState = 'running'; });
+    }
+  }); });
+}
+
+/* Important Dates — board */
+function makeBoardDateRow(d) {
+  var numCls = d.status === 'today' ? 'gold-date' : d.status === 'urgent' ? 'urgent-date' : '';
+  var badge  = d.badge ? '<span class="date-badge ' + (d.status==='today'?'today':d.status==='urgent'?'urgent':'info') + '">' + esc(d.badge) + '</span>' : '';
+  return '<div class="date-row ' + d.status + '">' +
+    '<div class="date-block ' + numCls + '"><div class="d-name">' + esc(d.dayName) + '</div><div class="d-num">' + esc(d.dayNum) + '</div><div class="d-mon">' + esc(d.month) + '</div></div>' +
+    '<div class="date-detail"><div class="date-label">' + esc(d.label) + '</div>' + (d.note ? '<div class="date-note">' + esc(d.note) + '</div>' : '') + '</div>' +
+    badge + '</div>';
+}
+
+function renderBoardDates(dates) {
+  var wrap = document.getElementById('dates-carousel');
+  wrap.innerHTML = '';
+  document.getElementById('dates-count').textContent = dates.length + ' dates';
+  if (!dates.length) {
+    wrap.innerHTML = '<div class="carousel-slide active" style="padding:8px;"><div class="empty-state">No dates added.</div></div>';
+    return;
+  }
+
+  var testSlide = document.createElement('div');
+  testSlide.className = 'carousel-slide active';
+  testSlide.style.padding = '8px 10px';
+  testSlide.innerHTML = '<div class="dates-list">' + dates.map(makeBoardDateRow).join('') + '</div>';
+  wrap.appendChild(testSlide);
+
+  requestAnimationFrame(function() { requestAnimationFrame(function() {
+    if (testSlide.scrollHeight <= wrap.clientHeight + 2) return;
+    wrap.innerHTML = '';
+    var pages = [], i = 0;
+    while (i < dates.length) {
+      var probe = document.createElement('div');
+      probe.className = 'carousel-slide active';
+      probe.style.cssText = 'padding:8px 10px;visibility:hidden;';
+      wrap.appendChild(probe);
+      var j = i, html = '';
+      while (j < dates.length) {
+        var test = html + makeBoardDateRow(dates[j]);
+        probe.innerHTML = '<div class="dates-list">' + test + '</div>';
+        if (probe.scrollHeight > wrap.clientHeight + 2 && j > i) break;
+        html = test; j++;
+      }
+      wrap.removeChild(probe);
+      pages.push(dates.slice(i, j)); i = j;
+    }
+    pages.forEach(function(page, pi) {
+      var slide = document.createElement('div');
+      slide.className = 'carousel-slide' + (pi === 0 ? ' active' : '');
+      slide.style.padding = '8px 10px';
+      slide.innerHTML = '<div class="dates-list">' + page.map(makeBoardDateRow).join('') + '</div>';
+      wrap.appendChild(slide);
+    });
+    if (pages.length > 1) {
+      var slides = wrap.querySelectorAll('.carousel-slide'), cur = 0;
+      setTimeout(function tick() {
+        slides[cur].classList.remove('active');
+        cur = (cur + 1) % slides.length;
+        slides[cur].classList.add('active');
+        setTimeout(tick, 7000);
+      }, 19000);
+    }
+  }); });
+}
+
+/* Announcements — board */
+function makeBoardAnnItem(a) {
+  var icon  = ICONS[a.iconType] || ICONS.bell;
+  var cls   = a.iconColor === 'red' ? 'red-icon' : a.iconColor === 'green' ? 'green-icon' : a.iconColor === 'soft' ? 'soft-icon' : '';
+  var tag   = a.tag || { label:'', style:'admin' };
+  return '<div class="ann-item' + (a.pinned ? ' pinned' : '') + '">' +
+    '<div class="ann-icon ' + cls + '">' + icon + '</div>' +
+    '<div class="ann-text">' +
+      '<div class="ann-title">' + esc(a.title) + '</div>' +
+      '<div class="ann-body">'  + esc(a.body)  + '</div>' +
+      '<div class="ann-footer">' +
+        '<span class="ann-tag ' + esc(tag.style) + '">' + esc(tag.label) + '</span>' +
+        '<span class="ann-time">' + esc(a.time) + '</span>' +
+      '</div>' +
+    '</div></div>';
+}
+
+function renderBoardAnns(anns) {
+  var wrap = document.getElementById('ann-carousel');
+  wrap.innerHTML = '';
+  document.getElementById('ann-count').textContent = anns.length + ' notices';
+  if (!anns.length) {
+    wrap.innerHTML = '<div class="carousel-slide active" style="padding:10px;"><div class="empty-state">No announcements.</div></div>';
+    return;
+  }
+
+  var testSlide = document.createElement('div');
+  testSlide.className = 'carousel-slide active';
+  testSlide.style.padding = '10px 12px';
+  testSlide.innerHTML = '<div class="ann-list">' + anns.map(makeBoardAnnItem).join('') + '</div>';
+  wrap.appendChild(testSlide);
+
+  requestAnimationFrame(function() { requestAnimationFrame(function() {
+    if (testSlide.scrollHeight <= wrap.clientHeight + 2) return;
+    wrap.innerHTML = '';
+    var pages = [], i = 0;
+    while (i < anns.length) {
+      var probe = document.createElement('div');
+      probe.className = 'carousel-slide active';
+      probe.style.cssText = 'padding:10px 12px;visibility:hidden;';
+      wrap.appendChild(probe);
+      var j = i, html = '';
+      while (j < anns.length) {
+        var test = html + makeBoardAnnItem(anns[j]);
+        probe.innerHTML = '<div class="ann-list">' + test + '</div>';
+        if (probe.scrollHeight > wrap.clientHeight + 2 && j > i) break;
+        html = test; j++;
+      }
+      wrap.removeChild(probe);
+      pages.push(anns.slice(i, j)); i = j;
+    }
+    pages.forEach(function(page, pi) {
+      var slide = document.createElement('div');
+      slide.className = 'carousel-slide' + (pi === 0 ? ' active' : '');
+      slide.style.padding = '10px 12px';
+      slide.innerHTML = '<div class="ann-list">' + page.map(makeBoardAnnItem).join('') + '</div>';
+      wrap.appendChild(slide);
+    });
+    if (pages.length > 1) {
+      var slides = wrap.querySelectorAll('.carousel-slide'), cur = 0;
+      setTimeout(function tick() {
+        slides[cur].classList.remove('active');
+        cur = (cur + 1) % slides.length;
+        slides[cur].classList.add('active');
+        setTimeout(tick, 7000);
+      }, 33000);
+    }
+  }); });
+}
+
+/* Events — board */
+function renderBoardEvents(events) {
+  var carouselEl = document.getElementById('advert-carousel');
+  var dotsEl     = document.getElementById('carousel-dots');
+  var progEl     = document.getElementById('advert-progress');
+  var ROTATE_MS  = 7000;
+
+  while (carouselEl.firstChild) carouselEl.removeChild(carouselEl.firstChild);
+  carouselEl.appendChild(progEl);
+  dotsEl.innerHTML = '';
+  if (eventsTimer) { clearInterval(eventsTimer); eventsTimer = null; }
+  eventsCur = 0;
+
+  document.getElementById('events-count').textContent = events.length + ' events';
+
+  if (!events.length) {
+    carouselEl.innerHTML = '<div class="empty-state" style="position:relative;z-index:2;padding:40px;">No upcoming events.</div>';
+    return;
+  }
+
+  events.forEach(function(ev, i) {
+    var slide = document.createElement('div');
+    slide.className = 'advert-slide' + (i === 0 ? ' active' : '');
+    slide.innerHTML =
+      '<div class="advert-bg-grad"></div>' +
+      '<div class="advert-content">' +
+        '<div class="advert-eyebrow">' + esc(ev.eyebrow) + '</div>' +
+        '<div class="advert-title">'   + esc(ev.title)   + '</div>' +
+        '<div class="advert-desc">'    + esc(ev.desc)    + '</div>' +
+        '<div class="advert-meta">' +
+          '<div class="advert-meta-item"><div class="advert-meta-label">When</div><div class="advert-meta-value">'  + esc(ev.datetime) + '</div></div>' +
+          '<div class="advert-meta-item"><div class="advert-meta-label">Where</div><div class="advert-meta-value">' + esc(ev.location) + '</div></div>' +
+        '</div>' +
+      '</div>';
+    carouselEl.insertBefore(slide, progEl);
+  });
+
+  events.forEach(function(_, i) {
+    var dot = document.createElement('div');
+    dot.className = 'dot' + (i === 0 ? ' active' : '');
+    dot.addEventListener('click', function() { goToEvent(i); });
+    dotsEl.appendChild(dot);
+  });
+
+  var slides = carouselEl.querySelectorAll('.advert-slide');
+  var dots   = dotsEl.querySelectorAll('.dot');
+
+  function startProg() {
+    progEl.style.transition = 'none';
+    progEl.style.width = '0%';
+    void progEl.offsetWidth;
+    progEl.style.transition = 'width ' + ROTATE_MS + 'ms linear';
+    progEl.style.width = '100%';
+  }
+
+  function goToEvent(idx) {
+    slides[eventsCur].classList.remove('active');
+    dots[eventsCur].classList.remove('active');
+    eventsCur = (idx + events.length) % events.length;
+    slides[eventsCur].classList.add('active');
+    dots[eventsCur].classList.add('active');
+    startProg();
+  }
+
+  startProg();
+  eventsTimer = setInterval(function() { goToEvent(eventsCur + 1); }, ROTATE_MS);
+}
 </script>
 </body>
 </html>
