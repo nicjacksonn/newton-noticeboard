@@ -975,8 +975,9 @@ function loadFromStorage() {
   } catch(e) {}
 }
 
-/* Load persisted data immediately so the board renders before Firebase responds */
+/* Load persisted data and render immediately — board is visible before Firebase responds */
 loadFromStorage();
+renderAll();
 
 var db = null;
 var auth = null;
@@ -992,7 +993,6 @@ if (isConfigured) {
   db   = firebase.database();
   auth = firebase.auth();
 
-  // Real-time listener: noticeboard updates whenever data changes in Firebase
   db.ref('noticeboard').on('value', function(snap) {
     var d = snap.val();
     if (d) {
@@ -1001,6 +1001,7 @@ if (isConfigured) {
       currentData.importantDates = d.importantDates || [];
       currentData.announcements  = d.announcements  || [];
       currentData.events         = d.events         || [];
+      saveToStorage(); /* keep localStorage in sync with Firebase */
     }
     renderAll();
   });
@@ -1010,8 +1011,6 @@ if (isConfigured) {
       showEditor();
     }
   });
-} else {
-  renderAll();
 }
 
 /* ══════════════════════════════════════════════════════════
@@ -1150,11 +1149,14 @@ function saveAll() {
     renderAll();
   }
 
+  /* Always save to localStorage immediately — Firebase is secondary */
+  saveToStorage();
+
   if (db) {
     db.ref('noticeboard').set(currentData).then(done).catch(function(err) {
       btn.disabled = false;
       btn.textContent = 'Publish Changes';
-      alert('Save failed: ' + err.message);
+      alert('Save failed: ' + err.message + '\n\nYour changes have been saved locally and will appear after refresh.');
     });
   } else {
     setTimeout(done, 300);
