@@ -624,6 +624,23 @@
     .btn-add { display: flex; align-items: center; justify-content: center; gap: 6px; padding: 8px 14px; background: rgba(27,58,140,0.07); color: var(--navy); border: 1.5px dashed rgba(27,58,140,0.25); border-radius: var(--radius-sm); font-family: inherit; font-size: 0.78rem; font-weight: 600; cursor: pointer; width: 100%; }
     .btn-add:hover { background: rgba(27,58,140,0.12); }
 
+    /* Section footer — clear / delete-selected controls */
+    .section-footer { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
+    .section-footer .btn-add { flex: 1; min-width: 120px; margin: 0; }
+    .btn-clear-sec  { padding: 7px 13px; background: transparent; color: #d63031; border: 1.5px solid rgba(214,48,49,0.45); border-radius: var(--radius-sm); font-family: inherit; font-size: 0.73rem; font-weight: 600; cursor: pointer; white-space: nowrap; transition: all 0.15s; }
+    .btn-clear-sec:hover  { background: rgba(214,48,49,0.07); border-color: #d63031; }
+    .btn-del-sel    { padding: 7px 13px; background: #d63031; color: #fff; border: none; border-radius: var(--radius-sm); font-family: inherit; font-size: 0.73rem; font-weight: 600; cursor: pointer; white-space: nowrap; display: none; }
+    .btn-del-sel:hover { background: #b52828; }
+
+    /* Per-item checkbox */
+    .item-select-cb { width: 15px; height: 15px; cursor: pointer; accent-color: #d63031; flex-shrink: 0; margin-top: 1px; }
+    .item-row.is-selected { border-color: #d63031; background: rgba(214,48,49,0.04); }
+    .item-row-actions { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; padding-top: 10px; border-top: 1px solid #eaedf5; }
+
+    /* Global clear button */
+    .btn-global-clear { padding: 6px 12px; background: rgba(214,48,49,0.08); color: #d63031; border: 1.5px solid rgba(214,48,49,0.3); border-radius: var(--radius-sm); font-family: inherit; font-size: 0.72rem; font-weight: 700; cursor: pointer; white-space: nowrap; transition: all 0.15s; }
+    .btn-global-clear:hover { background: rgba(214,48,49,0.15); }
+
     .pinned-label { display: flex; align-items: center; gap: 8px; font-size: 0.78rem; color: #555; cursor: pointer; padding: 6px 0; }
     .pinned-label input[type="checkbox"] { width: 15px; height: 15px; accent-color: var(--navy); cursor: pointer; }
 
@@ -783,6 +800,7 @@
       </div>
       <div class="admin-header-right">
         <span class="save-status" id="save-status">✓ Published</span>
+        <button class="btn-global-clear" id="clear-all-btn">Clear Everything</button>
         <button class="save-btn" id="save-btn">Publish Changes</button>
         <button class="back-btn" id="close-admin-btn">← Back to Board</button>
         <span class="logout-lnk" id="logout-btn">Sign out</span>
@@ -825,7 +843,11 @@
         </div>
         <div class="section-block-body">
           <div class="item-list" id="list-students"></div>
-          <button class="btn-add" id="add-student-btn">+ Add Student</button>
+          <div class="section-footer">
+            <button class="btn-del-sel" id="del-sel-students">Delete Selected</button>
+            <button class="btn-clear-sec" id="clear-sec-students">Clear All Students</button>
+            <button class="btn-add" id="add-student-btn">+ Add Student</button>
+          </div>
         </div>
       </div>
 
@@ -838,7 +860,11 @@
         </div>
         <div class="section-block-body">
           <div class="item-list" id="list-dates"></div>
-          <button class="btn-add" id="add-date-btn">+ Add Date</button>
+          <div class="section-footer">
+            <button class="btn-del-sel" id="del-sel-dates">Delete Selected</button>
+            <button class="btn-clear-sec" id="clear-sec-dates">Clear All Dates</button>
+            <button class="btn-add" id="add-date-btn">+ Add Date</button>
+          </div>
         </div>
       </div>
 
@@ -851,7 +877,11 @@
         </div>
         <div class="section-block-body">
           <div class="item-list" id="list-announcements"></div>
-          <button class="btn-add" id="add-announcement-btn">+ Add Announcement</button>
+          <div class="section-footer">
+            <button class="btn-del-sel" id="del-sel-announcements">Delete Selected</button>
+            <button class="btn-clear-sec" id="clear-sec-announcements">Clear All Announcements</button>
+            <button class="btn-add" id="add-announcement-btn">+ Add Announcement</button>
+          </div>
         </div>
       </div>
 
@@ -864,7 +894,11 @@
         </div>
         <div class="section-block-body">
           <div class="item-list" id="list-events"></div>
-          <button class="btn-add" id="add-event-btn">+ Add Event</button>
+          <div class="section-footer">
+            <button class="btn-del-sel" id="del-sel-events">Delete Selected</button>
+            <button class="btn-clear-sec" id="clear-sec-events">Clear All Events</button>
+            <button class="btn-add" id="add-event-btn">+ Add Event</button>
+          </div>
         </div>
       </div>
 
@@ -903,6 +937,29 @@ var currentData = {
   announcements:  [],
   events:         []
 };
+
+var LS_KEY = 'newton-noticeboard-v1';
+
+function saveToStorage() {
+  try { localStorage.setItem(LS_KEY, JSON.stringify(currentData)); } catch(e) {}
+}
+
+function loadFromStorage() {
+  try {
+    var raw = localStorage.getItem(LS_KEY);
+    if (!raw) return;
+    var d = JSON.parse(raw);
+    if (!d || typeof d !== 'object') return;
+    if (d.weekLabel)      currentData.weekLabel      = d.weekLabel;
+    if (d.trialStudents)  currentData.trialStudents  = d.trialStudents;
+    if (d.importantDates) currentData.importantDates = d.importantDates;
+    if (d.announcements)  currentData.announcements  = d.announcements;
+    if (d.events)         currentData.events         = d.events;
+  } catch(e) {}
+}
+
+/* Load persisted data immediately so the board renders before Firebase responds */
+loadFromStorage();
 
 var db = null;
 var auth = null;
@@ -1051,10 +1108,11 @@ function saveAll() {
   function done() {
     btn.disabled = false;
     btn.textContent = 'Publish Changes';
+    saveToStorage();
     var s = document.getElementById('save-status');
     s.classList.add('show');
     setTimeout(function() { s.classList.remove('show'); }, 2500);
-    renderAll(); // update the board behind the overlay immediately
+    renderAll();
   }
 
   if (db) {
@@ -1125,6 +1183,92 @@ function collectAll() {
   currentData.events         = collectEvents();
 }
 
+/* ══════════════════════════════════════════════════════════
+   CLEAR / SELECT CONTROLS
+══════════════════════════════════════════════════════════ */
+
+/* Helper: delete checked rows from a section */
+function deleteSelected(listId, sectionKey, renderFn) {
+  collectAll();
+  var rows = Array.from(document.querySelectorAll('#' + listId + ' .item-row'));
+  var toRemove = [];
+  rows.forEach(function(row, idx) {
+    var cb = row.querySelector('.item-select-cb');
+    if (cb && cb.checked) toRemove.push(idx);
+  });
+  if (!toRemove.length) return;
+  toRemove.reverse().forEach(function(idx) { currentData[sectionKey].splice(idx, 1); });
+  renderFn();
+}
+
+/* Helper: update the "Delete Selected" button visibility for a section */
+function syncDelSelBtn(listId, btnId) {
+  var anyChecked = Array.from(document.querySelectorAll('#' + listId + ' .item-select-cb')).some(function(cb){ return cb.checked; });
+  document.getElementById(btnId).style.display = anyChecked ? 'inline-flex' : 'none';
+}
+
+/* Helper: highlight/un-highlight a row when its checkbox changes */
+function onCheckboxChange(e) {
+  var cb = e.target;
+  if (!cb.classList.contains('item-select-cb')) return;
+  cb.closest('.item-row').classList.toggle('is-selected', cb.checked);
+  var list = cb.closest('.item-list');
+  if (!list) return;
+  var map = { 'list-students':'del-sel-students', 'list-dates':'del-sel-dates', 'list-announcements':'del-sel-announcements', 'list-events':'del-sel-events' };
+  if (map[list.id]) syncDelSelBtn(list.id, map[list.id]);
+}
+
+['list-students','list-dates','list-announcements','list-events'].forEach(function(id) {
+  document.getElementById(id).addEventListener('change', onCheckboxChange);
+});
+
+/* Section — Clear All */
+document.getElementById('clear-sec-students').addEventListener('click', function() {
+  if (!confirm('Remove all Trial Students? Changes take effect when you Publish.')) return;
+  collectAll(); currentData.trialStudents = []; renderAdminStudents();
+});
+document.getElementById('clear-sec-dates').addEventListener('click', function() {
+  if (!confirm('Remove all Important Dates? Changes take effect when you Publish.')) return;
+  collectAll(); currentData.importantDates = []; renderAdminDates();
+});
+document.getElementById('clear-sec-announcements').addEventListener('click', function() {
+  if (!confirm('Remove all Announcements? Changes take effect when you Publish.')) return;
+  collectAll(); currentData.announcements = []; renderAdminAnnouncements();
+});
+document.getElementById('clear-sec-events').addEventListener('click', function() {
+  if (!confirm('Remove all Upcoming Events? Changes take effect when you Publish.')) return;
+  collectAll(); currentData.events = []; renderAdminEvents();
+});
+
+/* Section — Delete Selected */
+document.getElementById('del-sel-students').addEventListener('click', function() {
+  deleteSelected('list-students', 'trialStudents', renderAdminStudents);
+});
+document.getElementById('del-sel-dates').addEventListener('click', function() {
+  deleteSelected('list-dates', 'importantDates', renderAdminDates);
+});
+document.getElementById('del-sel-announcements').addEventListener('click', function() {
+  deleteSelected('list-announcements', 'announcements', renderAdminAnnouncements);
+});
+document.getElementById('del-sel-events').addEventListener('click', function() {
+  deleteSelected('list-events', 'events', renderAdminEvents);
+});
+
+/* Global — Clear Everything */
+document.getElementById('clear-all-btn').addEventListener('click', function() {
+  if (!confirm('This will clear ALL sections — trial students, dates, announcements, and events.\n\nAre you sure?')) return;
+  if (!confirm('Last chance: clear everything on the noticeboard?')) return;
+  collectAll();
+  currentData.trialStudents  = [];
+  currentData.importantDates = [];
+  currentData.announcements  = [];
+  currentData.events         = [];
+  renderAdminStudents();
+  renderAdminDates();
+  renderAdminAnnouncements();
+  renderAdminEvents();
+});
+
 /* ── Trial Students (admin) ─────────────────────────────── */
 var YEAR_GROUPS = ['Year 8','Year 9','Year 10','Year 11','Year 12','Year 13'];
 var TRACKS      = [{value:'',label:'— None —'},'HUM','ENG','MED','BHA','SCI','BIZ'];
@@ -1154,7 +1298,7 @@ function renderAdminStudents() {
         fld('Track (Y12/13 only)',  sel('track',     s.track,     TRACKS)) +
         fld('Room',                 sel('room',      s.room,      ROOMS)) +
       '</div>' +
-      '<div class="item-row-actions"><button class="btn-delete" data-index="' + i + '">Remove</button></div>' +
+      '<div class="item-row-actions"><label style="display:flex;align-items:center;gap:6px;font-size:0.72rem;color:#888;cursor:pointer;"><input type="checkbox" class="item-select-cb" /> Select</label><button class="btn-delete" data-index="' + i + '">Remove</button></div>' +
     '</div>';
   }).join('');
   updateCount('count-students', currentData.trialStudents);
@@ -1245,7 +1389,7 @@ function renderAdminDates() {
       '<div class="item-row-fields">' +
         fld('Note (optional)', inp('note', d.note, 'e.g. 8:00 AM sharp. All staff required.')) +
       '</div>' +
-      '<div class="item-row-actions"><button class="btn-delete" data-index="' + i + '">Remove</button></div>' +
+      '<div class="item-row-actions"><label style="display:flex;align-items:center;gap:6px;font-size:0.72rem;color:#888;cursor:pointer;"><input type="checkbox" class="item-select-cb" /> Select</label><button class="btn-delete" data-index="' + i + '">Remove</button></div>' +
     '</div>';
   }).join('');
   updateCount('count-dates', currentData.importantDates);
@@ -1394,7 +1538,7 @@ function renderAdminAnnouncements() {
           '<label class="pinned-label"><input type="checkbox" data-field="pinned"' + pinned + ' /> Pin (gold border)</label>' +
         '</div>' +
       '</div>' +
-      '<div class="item-row-actions"><button class="btn-delete" data-index="' + i + '">Remove</button></div>' +
+      '<div class="item-row-actions"><label style="display:flex;align-items:center;gap:6px;font-size:0.72rem;color:#888;cursor:pointer;"><input type="checkbox" class="item-select-cb" /> Select</label><button class="btn-delete" data-index="' + i + '">Remove</button></div>' +
     '</div>';
   }).join('');
   updateCount('count-announcements', currentData.announcements);
@@ -1480,7 +1624,7 @@ function renderAdminEvents() {
       '<div class="item-row-fields">' +
         fld('Description', txt('desc', ev.desc, '')) +
       '</div>' +
-      '<div class="item-row-actions"><button class="btn-delete" data-index="' + i + '">Remove</button></div>' +
+      '<div class="item-row-actions"><label style="display:flex;align-items:center;gap:6px;font-size:0.72rem;color:#888;cursor:pointer;"><input type="checkbox" class="item-select-cb" /> Select</label><button class="btn-delete" data-index="' + i + '">Remove</button></div>' +
     '</div>';
   }).join('') +
   '<datalist id="' + eyebrowDlId + '">' +
