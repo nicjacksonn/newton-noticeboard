@@ -183,6 +183,18 @@
       border-color: rgba(255,255,255,0.3);
     }
 
+    #fullscreen-toggle {
+      display: flex; align-items: center; gap: 6px;
+      background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.18);
+      color: rgba(255,255,255,0.75); cursor: pointer;
+      font-size: 0.72rem; font-weight: 600; font-family: 'DM Sans', sans-serif;
+      letter-spacing: 0.06em; text-transform: uppercase;
+      padding: 6px 12px; border-radius: var(--radius-sm);
+      transition: color 0.2s, background 0.2s, border-color 0.2s;
+    }
+    #fullscreen-toggle:hover { color: #fff; background: rgba(255,255,255,0.15); border-color: rgba(255,255,255,0.3); }
+    #fullscreen-toggle svg { width: 13px; height: 13px; fill: currentColor; flex-shrink: 0; }
+
     /* ─── BODY GRID ─────────────────────────────────────────────── */
     .body-grid {
       display: grid;
@@ -700,6 +712,11 @@
     <div class="header-right">
       <div class="week-pill" id="week-badge">Week 1</div>
       <div class="live-indicator"><div class="live-dot"></div>Live</div>
+      <button id="fullscreen-toggle" title="Toggle fullscreen">
+        <svg id="fs-icon-enter" viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
+        <svg id="fs-icon-exit"  viewBox="0 0 24 24" style="display:none"><path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"/></svg>
+        <span id="fs-label">Fullscreen</span>
+      </button>
       <button id="admin-toggle" title="Staff Admin">⚙ Admin</button>
     </div>
   </header>
@@ -1011,6 +1028,24 @@ function updateClock() {
 }
 updateClock();
 setInterval(updateClock, 15000);
+
+/* ══════════════════════════════════════════════════════════
+   FULLSCREEN
+══════════════════════════════════════════════════════════ */
+document.getElementById('fullscreen-toggle').addEventListener('click', function() {
+  if (!document.fullscreenElement) {
+    document.documentElement.requestFullscreen().catch(function() {});
+  } else {
+    document.exitFullscreen();
+  }
+});
+
+document.addEventListener('fullscreenchange', function() {
+  var active = !!document.fullscreenElement;
+  document.getElementById('fs-icon-enter').style.display = active ? 'none'  : '';
+  document.getElementById('fs-icon-exit').style.display  = active ? ''      : 'none';
+  document.getElementById('fs-label').textContent        = active ? 'Exit'  : 'Fullscreen';
+});
 
 /* ══════════════════════════════════════════════════════════
    ADMIN OVERLAY — open / close
