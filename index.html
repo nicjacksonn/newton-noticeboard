@@ -367,6 +367,21 @@
     .date-badge.urgent { background: rgba(224,80,80,0.1);   color: var(--urgent); }
     .date-badge.info   { background: rgba(0,0,0,0.07);      color: #555; }
 
+    /* Auto "happening today" highlight — overrides status styling */
+    .date-row.is-today { border-left: 3px solid #d63031 !important; background: rgba(214,48,49,0.09) !important; }
+    .date-row.is-today .d-num  { color: #c0292a !important; }
+    .date-row.is-today .d-name { color: #c0292a !important; }
+    .date-row.is-today .d-mon  { color: #c0292a !important; }
+    .date-row.is-today .date-label { font-weight: 700; }
+
+    /* TODAY pill on event slides */
+    .event-today-tag {
+      position: absolute; top: 10px; right: 10px; z-index: 5;
+      background: #d63031; color: #fff;
+      font-size: 0.52rem; font-weight: 800; letter-spacing: 0.13em; text-transform: uppercase;
+      padding: 3px 9px; border-radius: 999px;
+    }
+
     /* ─── ANNOUNCEMENTS ─────────────────────────────────────────── */
     .ann-list { display: flex; flex-direction: column; gap: 7px; }
 
@@ -1405,7 +1420,7 @@ function collectAnnouncements() {
 /* ── Events (admin) ────────────────────────────────────── */
 document.getElementById('add-event-btn').addEventListener('click', function() {
   collectAll();
-  currentData.events.push({ eyebrow:'', title:'', desc:'', datetime:'', location:'' });
+  currentData.events.push({ eyebrow:'', title:'', desc:'', eventDate:'', eventTime:'', location:'' });
   renderAdminEvents();
 });
 
@@ -1423,17 +1438,43 @@ var EYEBROW_SUGGESTIONS = [
   'Staff Training Day','Open Evening','Parents Evening','Trip'
 ];
 
+function formatEventTime(t) {
+  if (!t) return '';
+  var parts = t.split(':');
+  var h = parseInt(parts[0], 10), m = parseInt(parts[1] || '0', 10);
+  var suffix = h >= 12 ? 'PM' : 'AM';
+  h = h % 12 || 12;
+  return h + (m ? ':' + ('0' + m).slice(-2) : ':00') + ' ' + suffix;
+}
+
+function formatEventDatetime(dateISO, timeStr) {
+  var disp = isoToDisplay(dateISO);
+  if (!disp.dayNum) return timeStr ? formatEventTime(timeStr) : '';
+  var base = disp.dayName + ' ' + disp.dayNum + ' ' + disp.month;
+  return timeStr ? base + ' · ' + formatEventTime(timeStr) : base;
+}
+
 function renderAdminEvents() {
   var eyebrowDlId = 'eyebrow-dl';
   document.getElementById('list-events').innerHTML = currentData.events.map(function(ev, i) {
+    var dateVal = ev.eventDate || (ev.datetime ? '' : '');
+    var timeVal = ev.eventTime || '';
     return '<div class="item-row">' +
       '<div class="item-row-fields cols-2" style="margin-bottom:8px;">' +
         '<div class="field-group"><label>Eyebrow Label</label>' +
           '<input type="text" data-field="eyebrow" value="' + esc(ev.eyebrow) + '" placeholder="e.g. This Weekend" list="' + eyebrowDlId + '" />' +
-          '<div class="field-hint">Small text shown above the event title — sets the context/timing at a glance (e.g. "This Week", "Coming Up", "After Half Term")</div>' +
+          '<div class="field-hint">Small text above the title — sets context at a glance (e.g. "This Week", "Coming Up")</div>' +
         '</div>' +
         fld('Event Title', inp('title', ev.title, '')) +
-        fld('Date &amp; Time', inp('datetime', ev.datetime, 'e.g. Sat 28 June · 9:00 AM')) +
+      '</div>' +
+      '<div class="item-row-fields cols-2" style="margin-bottom:8px;">' +
+        '<div class="field-group"><label>Date</label>' +
+          '<input type="date" data-field="eventDate" value="' + esc(dateVal) + '" />' +
+          '<div class="field-hint">Used to auto-highlight the event in red on the day it occurs</div>' +
+        '</div>' +
+        '<div class="field-group"><label>Time (optional)</label>' +
+          '<input type="time" data-field="eventTime" value="' + esc(timeVal) + '" />' +
+        '</div>' +
         fld('Location', inp('location', ev.location, 'e.g. Room 3, Floor 9')) +
       '</div>' +
       '<div class="item-row-fields">' +
@@ -1450,12 +1491,16 @@ function renderAdminEvents() {
 
 function collectEvents() {
   return Array.from(document.querySelectorAll('#list-events .item-row')).map(function(row) {
+    var dateVal = row.querySelector('[data-field="eventDate"]').value;
+    var timeVal = row.querySelector('[data-field="eventTime"]').value;
     return {
-      eyebrow:  row.querySelector('[data-field="eyebrow"]').value.trim(),
-      title:    row.querySelector('[data-field="title"]').value.trim(),
-      desc:     row.querySelector('[data-field="desc"]').value.trim(),
-      datetime: row.querySelector('[data-field="datetime"]').value.trim(),
-      location: row.querySelector('[data-field="location"]').value.trim()
+      eyebrow:   row.querySelector('[data-field="eyebrow"]').value.trim(),
+      title:     row.querySelector('[data-field="title"]').value.trim(),
+      desc:      row.querySelector('[data-field="desc"]').value.trim(),
+      eventDate: dateVal,
+      eventTime: timeVal,
+      datetime:  formatEventDatetime(dateVal, timeVal),
+      location:  row.querySelector('[data-field="location"]').value.trim()
     };
   });
 }
@@ -1526,13 +1571,28 @@ function renderBoardStudents(students) {
 }
 
 /* Important Dates — board */
+function todayISO() {
+  var n = new Date();
+  return n.getFullYear() + '-' + ('0'+(n.getMonth()+1)).slice(-2) + '-' + ('0'+n.getDate()).slice(-2);
+}
+
+function dateIsToday(d) {
+  var t = todayISO();
+  if (!d.dateStart) return false;
+  if (d.dateEnd && d.dateEnd >= d.dateStart) return t >= d.dateStart && t <= d.dateEnd;
+  return t === d.dateStart;
+}
+
 function makeBoardDateRow(d) {
-  var numCls = d.status === 'today' ? 'gold-date' : d.status === 'urgent' ? 'urgent-date' : '';
-  var badge  = d.badge ? '<span class="date-badge ' + (d.status==='today'?'today':d.status==='urgent'?'urgent':'info') + '">' + esc(d.badge) + '</span>' : '';
-  return '<div class="date-row ' + d.status + '">' +
+  var isToday = dateIsToday(d);
+  var numCls  = isToday ? '' : (d.status === 'today' ? 'gold-date' : d.status === 'urgent' ? 'urgent-date' : '');
+  var rowCls  = isToday ? 'is-today' : d.status;
+  var badge   = d.badge ? '<span class="date-badge ' + (isToday?'urgent':d.status==='today'?'today':d.status==='urgent'?'urgent':'info') + '">' + esc(d.badge) + '</span>' : '';
+  var todayPill = isToday ? '<span class="date-badge urgent" style="margin-right:4px;">Today</span>' : '';
+  return '<div class="date-row ' + rowCls + '">' +
     '<div class="date-block ' + numCls + '"><div class="d-name">' + esc(d.dayName) + '</div><div class="d-num">' + esc(d.dayNum) + '</div><div class="d-mon">' + esc(d.month) + '</div></div>' +
     '<div class="date-detail"><div class="date-label">' + esc(d.label) + '</div>' + (d.note ? '<div class="date-note">' + esc(d.note) + '</div>' : '') + '</div>' +
-    badge + '</div>';
+    todayPill + badge + '</div>';
 }
 
 function renderBoardDates(dates) {
@@ -1679,16 +1739,19 @@ function renderBoardEvents(events) {
   }
 
   events.forEach(function(ev, i) {
+    var isToday = ev.eventDate && ev.eventDate === todayISO();
     var slide = document.createElement('div');
     slide.className = 'advert-slide' + (i === 0 ? ' active' : '');
+    var whenVal = ev.datetime || formatEventDatetime(ev.eventDate, ev.eventTime);
     slide.innerHTML =
       '<div class="advert-bg-grad"></div>' +
+      (isToday ? '<div class="event-today-tag">Today</div>' : '') +
       '<div class="advert-content">' +
         '<div class="advert-eyebrow">' + esc(ev.eyebrow) + '</div>' +
         '<div class="advert-title">'   + esc(ev.title)   + '</div>' +
         '<div class="advert-desc">'    + esc(ev.desc)    + '</div>' +
         '<div class="advert-meta">' +
-          '<div class="advert-meta-item"><div class="advert-meta-label">When</div><div class="advert-meta-value">'  + esc(ev.datetime) + '</div></div>' +
+          '<div class="advert-meta-item' + (isToday ? '" style="border-color:#d63031;background:rgba(214,48,49,0.07)' : '') + '"><div class="advert-meta-label">When</div><div class="advert-meta-value" style="' + (isToday ? 'color:#c0292a;font-weight:800;' : '') + '">'  + esc(whenVal)    + '</div></div>' +
           '<div class="advert-meta-item"><div class="advert-meta-label">Where</div><div class="advert-meta-value">' + esc(ev.location) + '</div></div>' +
         '</div>' +
       '</div>';
