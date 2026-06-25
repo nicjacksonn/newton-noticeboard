@@ -975,9 +975,10 @@ function loadFromStorage() {
   } catch(e) {}
 }
 
-/* Load persisted data and render immediately — board is visible before Firebase responds */
+/* Load persisted data now; defer render until after the full script has run so that
+   variables like ICONS (declared later in the file) are initialised before use */
 loadFromStorage();
-renderAll();
+setTimeout(renderAll, 0);
 
 var db = null;
 var auth = null;
