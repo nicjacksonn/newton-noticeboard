@@ -1089,11 +1089,22 @@ function showLoginPanel() {
   document.getElementById('admin-editor').style.display = 'none';
 }
 
+var autoSaveTimer = null;
+function scheduleAutoSave() {
+  if (!adminWasPopulated) return;
+  clearTimeout(autoSaveTimer);
+  autoSaveTimer = setTimeout(safeCollectAndSave, 800);
+}
+
 function showEditor() {
   document.getElementById('admin-login').style.display  = 'none';
   document.getElementById('admin-editor').style.display = 'block';
   populateAdminUI();
   adminWasPopulated = true;
+  /* Auto-save on every keystroke / selection change in the admin panel */
+  var ed = document.getElementById('admin-editor');
+  ed.addEventListener('input',  scheduleAutoSave);
+  ed.addEventListener('change', scheduleAutoSave);
 }
 
 /* ══════════════════════════════════════════════════════════
@@ -1347,7 +1358,7 @@ function renderAdminStudents() {
         fld('Full Name',            inp('name',      s.name,      'e.g. Somchai Jaidee (Name)')) +
         fld('Visit Days',           inp('visitDay',  s.visitDay,  'e.g. Mon – Fri')) +
         fld('Year Group',           sel('yearGroup', s.yearGroup, YEAR_GROUPS)) +
-        fld('Track (Y12/13 only)',  sel('track',     s.track,     TRACKS)) +
+        fld('Track',               sel('track',     s.track,     TRACKS)) +
         fld('Room',                 sel('room',      s.room,      ROOMS)) +
       '</div>' +
       '<div class="item-row-actions"><label style="display:flex;align-items:center;gap:6px;font-size:0.72rem;color:#888;cursor:pointer;"><input type="checkbox" class="item-select-cb" /> Select</label><button class="btn-delete" data-index="' + i + '">Remove</button></div>' +
