@@ -473,12 +473,21 @@
 
     .advert-bg-grad { position: absolute; inset: 0; z-index: 0; background: #fff; }
 
-    /* Poster image slide */
+    /* Poster image slide — image fits fully within the frame (no cropping), any orientation */
+    .advert-slide.has-poster { background: #10193d; }
     .advert-slide.has-poster .advert-bg-grad { display: none; }
-    .advert-poster-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center; z-index: 0; }
-    .advert-slide.has-poster .advert-content { margin-top: auto; background: linear-gradient(to top, rgba(10,20,60,0.72) 0%, rgba(10,20,60,0.72) 40%, transparent 100%); padding: 10px 16px 8px; max-height: 25%; }
-    .advert-slide.has-poster .advert-eyebrow { color: rgba(255,255,255,0.75); }
-    .advert-slide.has-poster .advert-title   { color: #fff; font-size: 1.05rem; }
+    .advert-poster-img {
+      display: block; width: 100%; flex: 1 1 auto; min-height: 0;
+      object-fit: contain; object-position: center;
+      background: #10193d;
+    }
+    .advert-slide.has-poster .advert-content {
+      position: relative; z-index: 2; flex: 0 0 auto;
+      height: auto; background: #fff; border-top: 1px solid rgba(0,0,0,0.06);
+      padding: 8px 16px 8px;
+    }
+    .advert-slide.has-poster .advert-eyebrow { color: var(--navy); opacity: 0.5; }
+    .advert-slide.has-poster .advert-title   { color: #1a1a2e; font-size: 0.92rem; margin-bottom: 0; }
     .advert-slide.has-poster .advert-desc    { display: none; }
     .advert-slide.has-poster .advert-meta    { display: none; }
 
