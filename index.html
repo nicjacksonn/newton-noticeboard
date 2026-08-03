@@ -473,6 +473,15 @@
 
     .advert-bg-grad { position: absolute; inset: 0; z-index: 0; background: #fff; }
 
+    /* Poster image slide */
+    .advert-slide.has-poster .advert-bg-grad { display: none; }
+    .advert-poster-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center; z-index: 0; }
+    .advert-slide.has-poster .advert-content { margin-top: auto; background: linear-gradient(to top, rgba(10,20,60,0.82) 0%, transparent 100%); padding: 14px 16px 10px; }
+    .advert-slide.has-poster .advert-eyebrow { color: rgba(255,255,255,0.75); }
+    .advert-slide.has-poster .advert-title   { color: #fff; font-size: 1.05rem; }
+    .advert-slide.has-poster .advert-desc    { display: none; }
+    .advert-slide.has-poster .advert-meta    { display: none; }
+
     .advert-content {
       position: relative; z-index: 2;
       display: flex; flex-direction: column;
@@ -1628,7 +1637,7 @@ function collectAnnouncements() {
 /* ── Events (admin) ────────────────────────────────────── */
 document.getElementById('add-event-btn').addEventListener('click', function() {
   collectAll();
-  currentData.events.push({ eyebrow:'', title:'', desc:'', eventDate:'', eventTime:'', location:'' });
+  currentData.events.push({ eyebrow:'', title:'', desc:'', eventDate:'', eventTime:'', location:'', posterUrl:'' });
   renderAdminEvents();
 });
 
@@ -1685,8 +1694,18 @@ function renderAdminEvents() {
         '</div>' +
         fld('Location', inp('location', ev.location, 'e.g. Room 3, Floor 9')) +
       '</div>' +
-      '<div class="item-row-fields">' +
+      '<div class="item-row-fields" style="margin-bottom:8px;">' +
         fld('Description', txt('desc', ev.desc, '')) +
+      '</div>' +
+      /* Poster image */
+      '<div class="field-group" style="margin-bottom:8px;">' +
+        '<label>Poster / Image <span style="font-weight:400;color:#aaa;">(optional)</span></label>' +
+        (ev.posterUrl ? '<img src="' + esc(ev.posterUrl) + '" style="width:100%;max-height:120px;object-fit:cover;border-radius:6px;margin-bottom:6px;" />' : '') +
+        '<div style="display:flex;gap:8px;align-items:center;">' +
+          '<input type="text" data-field="posterUrl" value="' + esc(ev.posterUrl||'') + '" placeholder="Paste image URL (e.g. from Google Drive)" style="flex:1;" />' +
+          '<label style="padding:6px 12px;background:rgba(27,58,140,0.07);border:1.5px solid rgba(27,58,140,0.2);border-radius:6px;font-size:0.72rem;font-weight:600;color:var(--navy);cursor:pointer;white-space:nowrap;">Upload file<input type="file" accept="image/*,application/pdf" style="display:none;" class="poster-file-input" data-row-index="' + i + '" /></label>' +
+        '</div>' +
+        '<div class="field-hint">Upload an image/PDF poster or paste a URL. When set, the event shows as a full visual poster on the board.</div>' +
       '</div>' +
       '<div class="item-row-actions"><label style="display:flex;align-items:center;gap:6px;font-size:0.72rem;color:#888;cursor:pointer;"><input type="checkbox" class="item-select-cb" /> Select</label><button class="btn-delete" data-index="' + i + '">Remove</button></div>' +
     '</div>';
@@ -1696,6 +1715,24 @@ function renderAdminEvents() {
   '</datalist>';
   updateCount('count-events', currentData.events);
 }
+
+/* Handle poster file uploads — convert to base64 and store in the URL field */
+document.getElementById('list-events').addEventListener('change', function(e) {
+  var fileInput = e.target.closest('.poster-file-input');
+  if (!fileInput) return;
+  var file = fileInput.files[0];
+  if (!file) return;
+  var reader = new FileReader();
+  reader.onload = function(ev) {
+    collectAll();
+    var idx = parseInt(fileInput.dataset.rowIndex, 10);
+    if (currentData.events[idx]) {
+      currentData.events[idx].posterUrl = ev.target.result;
+      renderAdminEvents();
+    }
+  };
+  reader.readAsDataURL(file);
+});
 
 function collectEvents() {
   return Array.from(document.querySelectorAll('#list-events .item-row')).map(function(row) {
@@ -1708,7 +1745,8 @@ function collectEvents() {
       eventDate: dateVal,
       eventTime: timeVal,
       datetime:  formatEventDatetime(dateVal, timeVal),
-      location:  row.querySelector('[data-field="location"]').value.trim()
+      location:  row.querySelector('[data-field="location"]').value.trim(),
+      posterUrl: row.querySelector('[data-field="posterUrl"]').value.trim()
     };
   });
 }
@@ -1947,21 +1985,24 @@ function renderBoardEvents(events) {
   }
 
   events.forEach(function(ev, i) {
-    var isToday = ev.eventDate && ev.eventDate === todayISO();
+    var isToday   = ev.eventDate && ev.eventDate === todayISO();
+    var hasPoster = !!ev.posterUrl;
     var slide = document.createElement('div');
-    slide.className = 'advert-slide' + (i === 0 ? ' active' : '');
+    slide.className = 'advert-slide' + (i === 0 ? ' active' : '') + (hasPoster ? ' has-poster' : '');
     var whenVal = ev.datetime || formatEventDatetime(ev.eventDate, ev.eventTime);
     slide.innerHTML =
-      '<div class="advert-bg-grad"></div>' +
+      (hasPoster ? '<img class="advert-poster-img" src="' + esc(ev.posterUrl) + '" alt="" />' : '<div class="advert-bg-grad"></div>') +
       (isToday ? '<div class="event-today-tag">Today</div>' : '') +
       '<div class="advert-content">' +
         '<div class="advert-eyebrow">' + esc(ev.eyebrow) + '</div>' +
         '<div class="advert-title">'   + esc(ev.title)   + '</div>' +
-        '<div class="advert-desc">'    + esc(ev.desc)    + '</div>' +
-        '<div class="advert-meta">' +
-          '<div class="advert-meta-item' + (isToday ? '" style="border-color:#d63031;background:rgba(214,48,49,0.07)' : '') + '"><div class="advert-meta-label">When</div><div class="advert-meta-value" style="' + (isToday ? 'color:#c0292a;font-weight:800;' : '') + '">'  + esc(whenVal)    + '</div></div>' +
-          '<div class="advert-meta-item"><div class="advert-meta-label">Where</div><div class="advert-meta-value">' + esc(ev.location) + '</div></div>' +
-        '</div>' +
+        (hasPoster ? '' :
+          '<div class="advert-desc">' + esc(ev.desc) + '</div>' +
+          '<div class="advert-meta">' +
+            '<div class="advert-meta-item' + (isToday ? '" style="border-color:#d63031;background:rgba(214,48,49,0.07)' : '') + '"><div class="advert-meta-label">When</div><div class="advert-meta-value" style="' + (isToday ? 'color:#c0292a;font-weight:800;' : '') + '">' + esc(whenVal) + '</div></div>' +
+            '<div class="advert-meta-item"><div class="advert-meta-label">Where</div><div class="advert-meta-value">' + esc(ev.location) + '</div></div>' +
+          '</div>'
+        ) +
       '</div>';
     carouselEl.insertBefore(slide, progEl);
   });
