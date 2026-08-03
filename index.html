@@ -1716,20 +1716,38 @@ function renderAdminEvents() {
   updateCount('count-events', currentData.events);
 }
 
-/* Handle poster file uploads — convert to base64 and store in the URL field */
+/* Handle poster file uploads — resize/compress via canvas then store as base64 */
 document.getElementById('list-events').addEventListener('change', function(e) {
   var fileInput = e.target.closest('.poster-file-input');
   if (!fileInput) return;
   var file = fileInput.files[0];
   if (!file) return;
+  if (!file.type.startsWith('image/')) {
+    alert('Please upload an image file (JPG, PNG, etc.). For PDF posters, export a page as an image first.');
+    return;
+  }
   var reader = new FileReader();
-  reader.onload = function(ev) {
-    collectAll();
-    var idx = parseInt(fileInput.dataset.rowIndex, 10);
-    if (currentData.events[idx]) {
-      currentData.events[idx].posterUrl = ev.target.result;
-      renderAdminEvents();
-    }
+  reader.onload = function(loadEv) {
+    var img = new Image();
+    img.onload = function() {
+      var MAX_W = 900, MAX_H = 700;
+      var w = img.width, h = img.height;
+      if (w > MAX_W) { h = Math.round(h * MAX_W / w); w = MAX_W; }
+      if (h > MAX_H) { w = Math.round(w * MAX_H / h); h = MAX_H; }
+      var canvas = document.createElement('canvas');
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      var dataUrl = canvas.toDataURL('image/jpeg', 0.75);
+      collectAll();
+      var idx = parseInt(fileInput.dataset.rowIndex, 10);
+      if (currentData.events[idx]) {
+        currentData.events[idx].posterUrl = dataUrl;
+        try { saveToStorage(); } catch(ex) { alert('Image is too large to save. Try a smaller image.'); return; }
+        renderAdminEvents();
+        renderBoardEvents();
+      }
+    };
+    img.src = loadEv.target.result;
   };
   reader.readAsDataURL(file);
 });
