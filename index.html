@@ -1702,10 +1702,10 @@ function renderAdminEvents() {
         '<label>Poster / Image <span style="font-weight:400;color:#aaa;">(optional)</span></label>' +
         (ev.posterUrl ? '<img src="' + esc(ev.posterUrl) + '" style="width:100%;max-height:120px;object-fit:cover;border-radius:6px;margin-bottom:6px;" />' : '') +
         '<div style="display:flex;gap:8px;align-items:center;">' +
-          '<input type="text" data-field="posterUrl" value="' + esc(ev.posterUrl||'') + '" placeholder="Paste image URL (e.g. from Google Drive)" style="flex:1;" />' +
+          '<input type="text" data-field="posterUrl" value="' + esc(ev.posterUrl||'') + '" placeholder="Paste screenshot or image URL here (Ctrl+V)" style="flex:1;" />' +
           '<label style="padding:6px 12px;background:rgba(27,58,140,0.07);border:1.5px solid rgba(27,58,140,0.2);border-radius:6px;font-size:0.72rem;font-weight:600;color:var(--navy);cursor:pointer;white-space:nowrap;">Upload file<input type="file" accept="image/*,application/pdf" style="display:none;" class="poster-file-input" data-row-index="' + i + '" /></label>' +
         '</div>' +
-        '<div class="field-hint">Upload an image/PDF poster or paste a URL. When set, the event shows as a full visual poster on the board.</div>' +
+        '<div class="field-hint">Paste a screenshot (Ctrl+V), upload a file, or paste an image URL. Shows as a full visual poster on the board.</div>' +
       '</div>' +
       '<div class="item-row-actions"><label style="display:flex;align-items:center;gap:6px;font-size:0.72rem;color:#888;cursor:pointer;"><input type="checkbox" class="item-select-cb" /> Select</label><button class="btn-delete" data-index="' + i + '">Remove</button></div>' +
     '</div>';
@@ -1716,14 +1716,10 @@ function renderAdminEvents() {
   updateCount('count-events', currentData.events);
 }
 
-/* Handle poster file uploads — resize/compress via canvas then store as base64 */
-document.getElementById('list-events').addEventListener('change', function(e) {
-  var fileInput = e.target.closest('.poster-file-input');
-  if (!fileInput) return;
-  var file = fileInput.files[0];
-  if (!file) return;
-  if (!file.type.startsWith('image/')) {
-    alert('Please upload an image file (JPG, PNG, etc.). For PDF posters, export a page as an image first.');
+/* Shared helper — compress an image File/Blob and store it as the poster for the given row index */
+function storePosterImage(file, rowIndex) {
+  if (!file || !file.type.startsWith('image/')) {
+    alert('Please use an image file (JPG, PNG, etc.). For PDF posters, export a page as an image first.');
     return;
   }
   var reader = new FileReader();
@@ -1739,9 +1735,8 @@ document.getElementById('list-events').addEventListener('change', function(e) {
       canvas.getContext('2d').drawImage(img, 0, 0, w, h);
       var dataUrl = canvas.toDataURL('image/jpeg', 0.75);
       collectAll();
-      var idx = parseInt(fileInput.dataset.rowIndex, 10);
-      if (currentData.events[idx]) {
-        currentData.events[idx].posterUrl = dataUrl;
+      if (currentData.events[rowIndex]) {
+        currentData.events[rowIndex].posterUrl = dataUrl;
         try { saveToStorage(); } catch(ex) { alert('Image is too large to save. Try a smaller image.'); return; }
         renderAdminEvents();
         renderBoardEvents(currentData.events || []);
@@ -1750,6 +1745,30 @@ document.getElementById('list-events').addEventListener('change', function(e) {
     img.src = loadEv.target.result;
   };
   reader.readAsDataURL(file);
+}
+
+/* File upload button */
+document.getElementById('list-events').addEventListener('change', function(e) {
+  var fileInput = e.target.closest('.poster-file-input');
+  if (!fileInput) return;
+  storePosterImage(fileInput.files[0], parseInt(fileInput.dataset.rowIndex, 10));
+});
+
+/* Clipboard paste (screenshot or copied image) into the posterUrl text field */
+document.getElementById('list-events').addEventListener('paste', function(e) {
+  var target = e.target.closest('[data-field="posterUrl"]');
+  if (!target) return;
+  var items = e.clipboardData && e.clipboardData.items;
+  if (!items) return;
+  for (var i = 0; i < items.length; i++) {
+    if (items[i].type.startsWith('image/')) {
+      e.preventDefault();
+      var rows = Array.from(document.querySelectorAll('#list-events .item-row'));
+      var rowIndex = rows.indexOf(target.closest('.item-row'));
+      if (rowIndex >= 0) storePosterImage(items[i].getAsFile(), rowIndex);
+      return;
+    }
+  }
 });
 
 function collectEvents() {
