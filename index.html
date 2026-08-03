@@ -1744,7 +1744,7 @@ document.getElementById('list-events').addEventListener('change', function(e) {
         currentData.events[idx].posterUrl = dataUrl;
         try { saveToStorage(); } catch(ex) { alert('Image is too large to save. Try a smaller image.'); return; }
         renderAdminEvents();
-        renderBoardEvents();
+        renderBoardEvents(currentData.events || []);
       }
     };
     img.src = loadEv.target.result;
